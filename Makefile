@@ -35,6 +35,7 @@ init:
 	poetry add --dev flake8
 	poetry add --dev mypy
 	poetry add --dev pytest
+	poetry add --dev pytest-cov
 	mkdir .vscode
 	touch $(FILE_VSCODE_SETTINGS)
 	$(VSCODE_SETTINGS)
