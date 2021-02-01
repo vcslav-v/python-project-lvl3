@@ -1,8 +1,11 @@
 [tool.poetry]
-name = "python-project-lvl3"
+name = "hexlet-code"
 version = "0.1.0"
 description = ""
 authors = ["vcslav-v <vcslav.v@gmail.com>"]
+packages = [
+  { include = "page_loader" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -11,6 +14,9 @@ python = "^3.8"
 flake8 = "^3.8.4"
 mypy = "^0.800"
 pytest = "^6.2.2"
+
+[tool.poetry.scripts]
+page-loader = "page_loader.scripts.page_loader:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
