@@ -48,12 +48,13 @@ init:
 	poetry shell
 
 lint:
-	poetry run flake8 app
-	poetry run mypy app
+	poetry run flake8 page_loader
+	poetry run mypy page_loader
 
 install:
 	poetry install
 
 test:
 	poetry run pytest tests/
-
+coverage:
+	poetry run pytest --cov=page_loader --cov-report xml tests/
