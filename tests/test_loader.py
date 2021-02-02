@@ -1,4 +1,4 @@
-from page_loader.loader import download, make_file_name, add_scheme
+from page_loader.loader import download, make_file_name, prepare_url
 import os
 import requests_mock
 import tempfile
@@ -24,7 +24,7 @@ def test_make_file_name(url, content_type, expect):
 
 
 @pytest.mark.parametrize('url, content_type, error_type', [
-    ('http://google.com/', 'text/css', ValueError),
+    ('http://google.com/', 'text/css', ValueError)
 ])
 def test_make_file_name_errors(url, content_type, error_type):
     with pytest.raises(error_type):
@@ -50,9 +50,45 @@ def test_download(url, mock_url, content_type, body):
             result_path = download(url, tmp_dir)
         expect_path = os.path.join(
             tmp_dir,
-            make_file_name(add_scheme(url), 'text/html')
+            make_file_name(prepare_url(url), 'text/html')
         )
         assert result_path == expect_path
 
         with open(result_path, 'r') as result_file:
             assert body == result_file.read()
+
+
+@pytest.mark.parametrize(
+    'url, mock_url, content_type, status_code, error_type', [
+        (
+            'http://google.com',
+            'http://google.com',
+            'text/html',
+            301,
+            ConnectionError
+        ),
+        (
+            'googlecom',
+            'http://google.com',
+            'text/html',
+            200,
+            ValueError
+        ),
+
+    ]
+)
+def test_download_net_errors(
+    url,
+    mock_url,
+    content_type,
+    status_code,
+    error_type
+):
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        with requests_mock.Mocker() as mocker:
+            mocker.get(mock_url, headers={
+                'Content-Type': content_type,
+                }, status_code=status_code
+            )
+            with pytest.raises(error_type):
+                download(url, tmp_dir)
