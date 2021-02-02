@@ -42,6 +42,11 @@ def get_page(url: str) -> requests.models.Response:
             ERROR_RESPONSE_STATUS.format(status=response.status_code)
         )
 
+    content_type = response.headers['Content-Type'].split(';')[0].strip()
+
+    if content_type != 'text/html':
+        raise ValueError(ERROR_CONTENT_TYPE)
+
     return response
 
 
@@ -50,21 +55,29 @@ def save_page(
     response: requests.models.Response,
     output_path: str
 ) -> str:
-    output_file_path = os.path.join(
-        output_path,
-        make_file_name(url, response.headers['Content-Type'])
+
+    file_name = '{url_name}.html'.format(
+        url_name=normalize_name(url)
     )
 
-    with open(output_file_path, 'w') as output_file:
-        output_file.write(response.text)
+    output_file_path = os.path.join(
+        output_path,
+        file_name
+    )
+
+    try:
+        with open(output_file_path, 'w') as output_file:
+            output_file.write(page)
+    except Exception as e:
+        raise e
 
     return output_file_path
 
 
-def make_file_name(url: str, raw_content_type: str) -> str:
-    """Make a file name from the url.
+def normalize_name(url: str) -> str:
+    """Make a normalize name from the url.
     Example:
-    https://google.com -> google-com.html
+    https://google.com -> google-com
     """
     content_type = raw_content_type.split(';')[0]
     if content_type in TYPE_TO_EXTENSIONS:
@@ -75,17 +88,17 @@ def make_file_name(url: str, raw_content_type: str) -> str:
     parsed_url = urlparse(url)
     parsed_path, _ = os.path.splitext(parsed_url.path)
     without_scheme_url = parsed_url.netloc + parsed_path
+    without_scheme_url = without_scheme_url.rstrip('/')
 
-    file_name = '{name}.{extension}'.format(
-        name=re.sub(
-            RE_NOT_NUMS_OR_LETTERS,
-            "-",
-            without_scheme_url,
-            flags=re.I
+    name = re.sub(
+        RE_NOT_NUMS_OR_LETTERS,
+        "-",
+        without_scheme_url,
+        flags=re.I
         ),
         extension=extension
     )
-    return file_name
+    return name
 
 
 def prepare_url(url: str) -> str:
