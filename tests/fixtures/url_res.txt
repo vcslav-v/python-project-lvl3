@@ -1,0 +1,5 @@
+http://test.com/assets/icons/meta/DDG-icon_256x256.png?key=value&key1=value1
+http://test.com/assets/professions/nodejs.png
+http://test.com/assets/home/landing/icons/search.svg
+http://test.com/packs/js/runtime.js
+http://test.com/assets/application.css
