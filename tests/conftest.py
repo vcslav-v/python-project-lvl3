@@ -13,30 +13,32 @@ def test_html():
 
 
 @pytest.fixture
-def img_test_html():
-    with open(os.path.join(fixtures_path, 'img_test.html')) as fixture_file:
+def res_test_html():
+    with open(os.path.join(fixtures_path, 'res_test.html')) as fixture_file:
         fixture_data = fixture_file.read()
     return fixture_data
 
 
 @pytest.fixture
-def img_test_expect_html():
+def res_test_expect_html():
     with open(
-        os.path.join(fixtures_path, 'img_test_expect.html')
+        os.path.join(fixtures_path, 'res_test_expect.html')
     ) as fixture_file:
         fixture_data = fixture_file.read()
     return fixture_data
 
 
 @pytest.fixture
-def file_path_img_expect():
-    with open(os.path.join(fixtures_path, 'file_path_img_expect.txt')) as fixture_file:
+def file_path_res_expect():
+    with open(
+        os.path.join(fixtures_path, 'file_path_res_expect.txt')
+    ) as fixture_file:
         fixture_data = fixture_file.readlines()
     return fixture_data
 
 
 @pytest.fixture
-def url_imgs():
-    with open(os.path.join(fixtures_path, 'url_imgs.txt')) as fixture_file:
+def url_res():
+    with open(os.path.join(fixtures_path, 'url_res.txt')) as fixture_file:
         fixture_data = fixture_file.readlines()
     return fixture_data

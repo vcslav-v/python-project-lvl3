@@ -11,12 +11,13 @@ from bs4 import BeautifulSoup
     'url, test_data, mock_img_urls, expect_data, expect_img_files', [
         (
             'http://test.com',
-            'img_test_html',
-            'url_imgs',
-            'img_test_expect_html',
-            'file_path_img_expect',
+            'res_test_html',
+            'url_res',
+            'res_test_expect_html',
+            'file_path_res_expect',
         )
-])
+    ]
+)
 def test_dowload_resources(
     url,
     test_data,
@@ -43,7 +44,7 @@ def test_dowload_resources(
         assert os.path.exists(resources_output_path) and (
             os.path.isdir(resources_output_path)
         )
-
+        print(os.listdir(resources_output_path))
         for path_file in expect_img_files:
             assert os.path.exists(os.path.join(
                 resources_output_path,

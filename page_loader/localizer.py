@@ -2,12 +2,16 @@ import os
 import re
 from typing import Tuple
 from urllib.parse import urlparse
+from urllib.parse import ParseResult
 
 import requests
 from bs4 import BeautifulSoup
 
-RE_IS_IMG = r'(png|jpg|jpeg)($|(?=\?.*))'
 RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
+RE_IS_RES = r''
+
+RESOURCES_TAGS = {'img', 'link', 'script'}
+RES_ATTR = {'src', 'href'}
 
 
 def download_resources(
@@ -19,8 +23,8 @@ def download_resources(
     """Localize the resources page."""
     soup = BeautifulSoup(html_text, 'lxml')
     for child in soup.html.recursiveChildGenerator():
-        if child.name:
-            child.attrs = localize_img(
+        if child.name in RESOURCES_TAGS:
+            child.attrs = localize_src(
                 child.attrs,
                 url,
                 url_name,
@@ -29,16 +33,21 @@ def download_resources(
     return soup.prettify(formatter='html5')
 
 
-def localize_img(
+def localize_src(
     attrs: dict,
     url: str,
     url_name: str,
     output_path: str
 ) -> dict:
     """Localize imgs page."""
+    parsed_url = urlparse(url)
+
     for attr, value in attrs.items():
-        if is_img_path(value):
-            resource_url, resource_name = get_resource_url_name(value, url)
+        if is_local_resource(attr, value, parsed_url.netloc):
+            resource_url, resource_name = get_resource_url_name(
+                value,
+                parsed_url
+            )
             attrs[attr] = download_resource(
                 resource_url,
                 resource_name,
@@ -48,15 +57,23 @@ def localize_img(
     return attrs
 
 
-def is_img_path(value: str) -> bool:
-    if not isinstance(value, str):
+def is_local_resource(attr: str, value: str, netloc: str) -> bool:
+    if not isinstance(value, str) or attr not in RES_ATTR:
         return False
-    if re.search(RE_IS_IMG, value, flags=re.I):
-        return True
-    return False
+
+    parsed_value_url = urlparse(value)
+    if parsed_value_url.netloc and netloc != parsed_value_url.netloc:
+        return False
+
+    _, extention = os.path.splitext(parsed_value_url.path.strip('/'))
+
+    return extention != ''
 
 
-def get_resource_url_name(value: str, url: str) -> Tuple[str, str]:
+def get_resource_url_name(
+    value: str,
+    parsed_url: ParseResult
+) -> Tuple[str, str]:
     """Generate the file name by url."""
     parsed_value_url = urlparse(value)
 
@@ -64,7 +81,6 @@ def get_resource_url_name(value: str, url: str) -> Tuple[str, str]:
     parsed_value_path = normalize_name(parsed_path) + extention
 
     if not parsed_value_url.scheme:
-        parsed_url = urlparse(url)
         target_address = '{scheme}://{netloc}{path}?{query}'.format(
             scheme=parsed_url.scheme,
             netloc=parsed_url.netloc,

@@ -1,4 +1,0 @@
-http://test.com/assets/icons/meta/DDG-icon_256x256.png?key=value&key1=value1
-http://test.com/assets/logo_social-media.png
-http://test.com/assets/professions/nodejs.png
-https://nplus1.ru/images/2021/01/29/e763ad82163d0f13a8bd321e593882ff.jpg
