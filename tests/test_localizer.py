@@ -10,7 +10,12 @@ from bs4 import BeautifulSoup
 @pytest.mark.parametrize(
     'url, test_data, mock_img_urls, expect_data, expect_img_files', [
         (
-            'http://test.com',
+            {
+                'scheme': 'http://',
+                'netloc': 'test.com',
+                'path': '',
+                'full_url': 'http://test.com'
+            },
             'res_test_html',
             'url_res',
             'res_test_expect_html',

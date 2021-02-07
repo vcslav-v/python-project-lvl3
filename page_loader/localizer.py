@@ -16,37 +16,35 @@ RES_ATTR = {'src', 'href'}
 
 def download_resources(
     html_text: str,
-    url: str,
+    url: dict,
     output_path: str,
     url_name: str
 ) -> str:
     """Localize the resources page."""
     soup = BeautifulSoup(html_text, 'lxml')
-    for child in soup.html.recursiveChildGenerator():
-        if child.name in RESOURCES_TAGS:
-            child.attrs = localize_src(
-                child.attrs,
-                url,
-                url_name,
-                output_path
-            )
+    tags = soup.find_all(RESOURCES_TAGS)
+    for child in tags:
+        child.attrs = localize_src(
+            child.attrs,
+            url,
+            url_name,
+            output_path
+        )
     return soup.prettify(formatter='html5')
 
 
 def localize_src(
     attrs: dict,
-    url: str,
+    url: dict,
     url_name: str,
     output_path: str
 ) -> dict:
     """Localize imgs page."""
-    parsed_url = urlparse(url)
-
     for attr, value in attrs.items():
-        if is_local_resource(attr, value, parsed_url.netloc):
+        if is_local_resource(attr, value, url['netloc']):
             resource_url, resource_name = get_resource_url_name(
                 value,
-                parsed_url
+                url
             )
             attrs[attr] = download_resource(
                 resource_url,
@@ -72,7 +70,7 @@ def is_local_resource(attr: str, value: str, netloc: str) -> bool:
 
 def get_resource_url_name(
     value: str,
-    parsed_url: ParseResult
+    url: dict
 ) -> Tuple[str, str]:
     """Generate the file name by url."""
     parsed_value_url = urlparse(value)
@@ -81,9 +79,9 @@ def get_resource_url_name(
     parsed_value_path = normalize_name(parsed_path) + extention
 
     if not parsed_value_url.scheme:
-        target_address = '{scheme}://{netloc}{path}?{query}'.format(
-            scheme=parsed_url.scheme,
-            netloc=parsed_url.netloc,
+        target_address = '{scheme}{netloc}{path}?{query}'.format(
+            scheme=url['scheme'],
+            netloc=url['netloc'],
             path=parsed_value_url.path,
             query=parsed_value_url.query,
         )

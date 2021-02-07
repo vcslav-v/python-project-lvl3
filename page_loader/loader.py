@@ -24,15 +24,15 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     Return:
         Full path to file.
     """
-    prepared_url = prepare_url(url)
+    url_data = get_url_data(url)
 
-    response = get_page(prepared_url)
+    response = get_page(url_data)
 
-    url_name = get_url_name(prepared_url)
+    url_name = get_url_name(url_data)
 
     page = download_resources(
         response.content.decode(),
-        prepared_url,
+        url_data,
         output_path,
         url_name
     )
@@ -42,11 +42,11 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     return output_file_path
 
 
-def get_page(url: str) -> requests.models.Response:
+def get_page(url: dict) -> requests.models.Response:
     """Load the page."""
     try:
         with requests.Session() as session:
-            response = session.get(url)
+            response = session.get(url['full_url'])
     except Exception as e:
         raise e
 
@@ -87,8 +87,11 @@ def save_page(
     return output_file_path
 
 
-def prepare_url(url: str) -> str:
-    """Check the validity of the url, and add a schema if not."""
+def get_url_data(url: str) -> dict:
+    """Check the validity of the url, make data dict.
+    Returns:
+    {scheme, netloc, path, query, full_url}
+    """
     re_checked_url = re.search(RE_URL, url, flags=re.I)
 
     if not re_checked_url:
@@ -96,15 +99,24 @@ def prepare_url(url: str) -> str:
 
     parsed_url = urlparse(url)
 
-    if not parsed_url.scheme:
-        return 'http://' + url
-    return url
+    url_data = {
+        'netloc': parsed_url.netloc,
+        'path': parsed_url.path.rstrip('/'),
+        'query': parsed_url.query
+    }
+
+    if parsed_url.scheme:
+        url_data['scheme'] = parsed_url.scheme + '://'
+        url_data['full_url'] = parsed_url.geturl()
+    else:
+        url_data['scheme'] = 'http://'
+        url_data['full_url'] = url_data['scheme'] + parsed_url.geturl()
+
+    return url_data
 
 
-def get_url_name(url: str) -> str:
+def get_url_name(url: dict) -> str:
     """Generate the page name by url."""
-    parsed_url = urlparse(url)
-    parsed_path, _ = os.path.splitext(parsed_url.path)
-    without_scheme_url = parsed_url.netloc + parsed_path
-    without_scheme_url = without_scheme_url.rstrip('/')
+    parsed_path, _ = os.path.splitext(url['path'])
+    without_scheme_url = url['netloc'] + parsed_path
     return normalize_name(without_scheme_url)
