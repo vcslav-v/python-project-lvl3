@@ -53,7 +53,10 @@ def save_page(
         with open(output_file_path, 'w') as output_file:
             output_file.write(page)
     except Exception as e:
-        logger.exception('Make page file error')
+        logger.error('{ex}: {path}'.format(
+                ex=type(e).__name__,
+                path=output_file_path
+            ))
         raise e
 
     return output_file_path

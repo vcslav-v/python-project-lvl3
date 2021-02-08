@@ -88,7 +88,8 @@ def save_resource(
         try:
             os.mkdir(full_resources_output_path)
         except Exception as e:
-            logger.exception('Make {dir} directory resources error'.format(
+            logger.error('{ex}: directory {dir} is not maked'.format(
+                ex=type(e).__name__,
                 dir=full_resources_output_path
             ))
             raise e
@@ -99,7 +100,8 @@ def save_resource(
         with open(file_path, 'wb') as res_file:
             res_file.write(res['data'])
     except Exception as e:
-        logger.exception(
-            'Make file error - {path}'.format(path=file_path)
-        )
+        logger.error('{ex}: file {path} is not saved'.format(
+                ex=type(e).__name__,
+                path=file_path
+            ))
         raise e

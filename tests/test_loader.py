@@ -113,7 +113,7 @@ def test_download(url, mock_url, content_type, data, expect_data, request):
 
     ]
 )
-def test_download_errors(
+def test_download_request_errors(
     url,
     mock_url,
     content_type,
@@ -128,3 +128,10 @@ def test_download_errors(
             )
             with pytest.raises(error_type):
                 download(url, tmp_dir)
+
+
+def test_download_dir_not_exist():
+    URL = 'test.com'
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        with pytest.raises(FileNotFoundError):
+            download(URL, os.path.join(tmp_dir, 'temp'))
