@@ -2,7 +2,6 @@ import os
 import re
 from typing import Tuple
 from urllib.parse import urlparse
-from urllib.parse import ParseResult
 
 import requests
 from bs4 import BeautifulSoup
@@ -18,7 +17,6 @@ def download_resources(
     html_text: str,
     url: dict,
     output_path: str,
-    url_name: str
 ) -> str:
     """Localize the resources page."""
     soup = BeautifulSoup(html_text, 'lxml')
@@ -27,7 +25,6 @@ def download_resources(
         child.attrs = localize_src(
             child.attrs,
             url,
-            url_name,
             output_path
         )
     return soup.prettify(formatter='html5')
@@ -36,7 +33,6 @@ def download_resources(
 def localize_src(
     attrs: dict,
     url: dict,
-    url_name: str,
     output_path: str
 ) -> dict:
     """Localize imgs page."""
@@ -49,7 +45,7 @@ def localize_src(
             attrs[attr] = download_resource(
                 resource_url,
                 resource_name,
-                url_name,
+                url['file_name'],
                 output_path
             )
     return attrs

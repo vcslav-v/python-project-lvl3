@@ -28,16 +28,13 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
 
     response = get_page(url_data)
 
-    url_name = get_url_name(url_data)
-
     page = download_resources(
         response.content.decode(),
         url_data,
-        output_path,
-        url_name
+        output_path
     )
 
-    output_file_path = save_page(url_name, page, output_path)
+    output_file_path = save_page(url_data['file_name'], page, output_path)
 
     return output_file_path
 
@@ -111,6 +108,8 @@ def get_url_data(url: str) -> dict:
     else:
         url_data['scheme'] = 'http://'
         url_data['full_url'] = url_data['scheme'] + parsed_url.geturl()
+
+    url_data['file_name'] = get_url_name(url_data)
 
     return url_data
 
