@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
                 'path': '',
                 'full_url': 'http://test.com',
                 'file_name': 'test-com',
+                'res_folder_name': 'test-com_files'
             },
             'res_test_html',
             'url_res',

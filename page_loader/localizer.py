@@ -1,8 +1,8 @@
 import os
 from urllib.parse import urlparse
 from page_loader.parser import get_resource_data
+from page_loader.net import get_response_content
 
-import requests
 from bs4 import BeautifulSoup
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
@@ -38,11 +38,16 @@ def localize_src(
                 value,
                 url
             )
-            attrs[attr] = download_resource(
-                res_data,
-                url['file_name'],
-                output_path
+            res_data['data'] = get_response_content(
+                res_data['url'],
+                is_html=False,
             )
+            save_resource(
+                res_data,
+                url,
+                output_path,
+            )
+            attrs[attr] = res_data['local_path']
     return attrs
 
 
@@ -59,18 +64,15 @@ def is_local_resource(attr: str, value: str, netloc: str) -> bool:
     return extention != ''
 
 
-def download_resource(
+def save_resource(
     res: dict,
-    url_name: str,
+    url: dict,
     output_path: str
-) -> str:
+):
     """Save the resource to disk and return the new path."""
-    output_dir_name = '{url_name}_files'.format(
-        url_name=url_name
+    full_resources_output_path = os.path.join(
+        output_path, url['res_folder_name']
     )
-    full_resources_output_path = os.path.join(output_path, output_dir_name)
-
-    res_data = requests.get(res['url'])
 
     if not os.path.exists(full_resources_output_path) or (
         not os.path.isdir(full_resources_output_path)
@@ -78,9 +80,6 @@ def download_resource(
         os.mkdir(full_resources_output_path)
 
     file_path = os.path.join(full_resources_output_path, res['file_name'])
-    local_file_path = os.path.join(output_dir_name, res['file_name'])
 
     with open(file_path, 'wb') as res_file:
-        res_file.write(res_data.content)
-
-    return local_file_path
+        res_file.write(res['data'])

@@ -34,6 +34,7 @@ def get_url_data(url: str) -> dict:
         url_data['full_url'] = url_data['scheme'] + parsed_url.geturl()
 
     url_data['file_name'] = get_url_name(url_data)
+    url_data['res_folder_name'] = url_data['file_name'] + '_files'
 
     return url_data
 
@@ -65,9 +66,15 @@ def get_resource_data(
     else:
         res_url = value
 
+    local_path = os.path.join(
+        '{url_name}_files'.format(url_name=url['file_name']),
+        file_name
+    )
+
     return {
         'url': res_url,
         'file_name': file_name,
+        'local_path': local_path
     }
 
 
