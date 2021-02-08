@@ -8,10 +8,10 @@ RE_URL = (
 RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
 
 
-def get_url_data(url: str) -> dict:
+def get_url_info(url: str) -> dict:
     """Check the validity of the url, make data dict.
     Returns:
-    {scheme, netloc, path, query, full_url}
+    {scheme, netloc, path, query, full_url, file_name, res_folder_name}
     """
     re_checked_url = re.search(RE_URL, url, flags=re.I)
 
@@ -46,11 +46,13 @@ def get_url_name(url: dict) -> str:
     return normalize_name(without_scheme_url)
 
 
-def get_resource_data(
+def get_resource_info(
     value: str,
     url: dict
 ) -> dict:
-    """Generate the file name by url."""
+    """Generate the resource info.
+    {'url', 'file_name', 'local_path'}
+    """
     parsed_value_url = urlparse(value)
 
     parsed_path, extention = os.path.splitext(parsed_value_url.path.strip('/'))

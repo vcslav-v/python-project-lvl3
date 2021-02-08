@@ -1,15 +1,16 @@
 import os
 from urllib.parse import urlparse
-from page_loader.parser import get_resource_data
-from page_loader.net import get_response_content
 
 from bs4 import BeautifulSoup
+
+from page_loader.net import get_response_content
+from page_loader.parser import get_resource_info
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
-def download_resources(
+def localize_resources(
     html_text: str,
     url: dict,
     output_path: str,
@@ -18,7 +19,7 @@ def download_resources(
     soup = BeautifulSoup(html_text, 'lxml')
     tags = soup.find_all(RESOURCES_TAGS)
     for tag in tags:
-        tag.attrs = localize_src(
+        tag.attrs = localize_tag(
             tag.attrs,
             url,
             output_path
@@ -26,28 +27,28 @@ def download_resources(
     return soup.prettify(formatter='html5')
 
 
-def localize_src(
+def localize_tag(
     attrs: dict,
     url: dict,
     output_path: str
 ) -> dict:
-    """Localize res page."""
+    """Localize tag attrs."""
     for attr, value in attrs.items():
         if is_local_resource(attr, value, url['netloc']):
-            res_data = get_resource_data(
+            res_info = get_resource_info(
                 value,
                 url
             )
-            res_data['data'] = get_response_content(
-                res_data['url'],
+            res_info['data'] = get_response_content(
+                res_info['url'],
                 is_html=False,
             )
             save_resource(
-                res_data,
+                res_info,
                 url,
                 output_path,
             )
-            attrs[attr] = res_data['local_path']
+            attrs[attr] = res_info['local_path']
     return attrs
 
 
@@ -69,7 +70,7 @@ def save_resource(
     url: dict,
     output_path: str
 ):
-    """Save the resource to disk and return the new path."""
+    """Save the resource to disk."""
     full_resources_output_path = os.path.join(
         output_path, url['res_folder_name']
     )

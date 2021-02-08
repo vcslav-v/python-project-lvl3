@@ -1,7 +1,7 @@
 import os
 
-from page_loader.localizer import download_resources
-from page_loader.parser import get_url_data
+from page_loader.localizer import localize_resources
+from page_loader.parser import get_url_info
 from page_loader.net import get_response_content
 
 
@@ -10,29 +10,29 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     Return:
         Full path to file.
     """
-    url_data = get_url_data(url)
+    url_info = get_url_info(url)
 
-    response = get_response_content(url_data['full_url'])
+    response = get_response_content(url_info['full_url'])
 
-    page = download_resources(
+    page = localize_resources(
         response.decode(),
-        url_data,
+        url_info,
         output_path
     )
 
-    output_file_path = save_page(url_data['file_name'], page, output_path)
+    output_file_path = save_page(url_info['file_name'], page, output_path)
 
     return output_file_path
 
 
 def save_page(
-    url_name: str,
+    url_file_name: str,
     page: str,
     output_path: str
 ) -> str:
     """Save the html page to disk."""
     file_name = '{url_name}.html'.format(
-        url_name=url_name
+        url_name=url_file_name
     )
 
     output_file_path = os.path.join(

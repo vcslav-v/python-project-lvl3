@@ -5,7 +5,7 @@ ERROR_CONTENT_TYPE = 'It is not possible to process this type of content'
 
 
 def get_response_content(url: str, is_html=True) -> bytes:
-    """Load the page."""
+    """Load the content."""
     try:
         with requests.Session() as session:
             response = session.get(url)

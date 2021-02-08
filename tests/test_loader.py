@@ -1,5 +1,5 @@
 from page_loader.loader import download
-from page_loader.parser import get_url_data, get_url_name
+from page_loader.parser import get_url_info, get_url_name
 import os
 import requests_mock
 import tempfile
@@ -74,7 +74,7 @@ def test_download(url, mock_url, content_type, data, expect_data, request):
             result_path = download(url, tmp_dir)
         expect_path = os.path.join(
             tmp_dir,
-            get_url_name(get_url_data(url)) + '.html'
+            get_url_name(get_url_info(url)) + '.html'
         )
         assert result_path == expect_path
 
