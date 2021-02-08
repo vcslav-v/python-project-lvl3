@@ -77,9 +77,15 @@ def save_resource(
     if not os.path.exists(full_resources_output_path) or (
         not os.path.isdir(full_resources_output_path)
     ):
-        os.mkdir(full_resources_output_path)
+        try:
+            os.mkdir(full_resources_output_path)
+        except Exception as e:
+            raise e
 
     file_path = os.path.join(full_resources_output_path, res['file_name'])
 
-    with open(file_path, 'wb') as res_file:
-        res_file.write(res['data'])
+    try:
+        with open(file_path, 'wb') as res_file:
+            res_file.write(res['data'])
+    except Exception as e:
+        raise e
