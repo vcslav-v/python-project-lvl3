@@ -37,10 +37,9 @@ def test_dowload_resources(
     expect_data = request.getfixturevalue(expect_data)
     expect_img_files = request.getfixturevalue(expect_img_files)
     expect_soup = BeautifulSoup(expect_data, 'lxml')
-    res_dir = '{url_name}_files'.format(url_name=url['file_name'])
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        resources_output_path = os.path.join(tmp_dir, res_dir)
+        resources_output_path = os.path.join(tmp_dir, url['res_folder_name'])
         with requests_mock.Mocker() as mocker:
             for img_url in mock_img_urls:
                 mocker.get(img_url.strip(), text='img')
@@ -49,7 +48,6 @@ def test_dowload_resources(
         assert os.path.exists(resources_output_path) and (
             os.path.isdir(resources_output_path)
         )
-        print(os.listdir(resources_output_path))
         for path_file in expect_img_files:
             assert os.path.exists(os.path.join(
                 resources_output_path,
