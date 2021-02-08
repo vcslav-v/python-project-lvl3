@@ -1,7 +1,6 @@
 import re
 from urllib.parse import urlparse
 import os
-from typing import Tuple
 
 RE_URL = (
     r'^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]+)([\/\w \.-]*)*\/?(\??(.?)*)$'
@@ -46,27 +45,30 @@ def get_url_name(url: dict) -> str:
     return normalize_name(without_scheme_url)
 
 
-def get_resource_url_name(
+def get_resource_url_data(
     value: str,
     url: dict
-) -> Tuple[str, str]:
+) -> dict:
     """Generate the file name by url."""
     parsed_value_url = urlparse(value)
 
     parsed_path, extention = os.path.splitext(parsed_value_url.path.strip('/'))
-    parsed_value_path = normalize_name(parsed_path) + extention
+    file_name = normalize_name(parsed_path) + extention
 
     if not parsed_value_url.scheme:
-        target_address = '{scheme}{netloc}{path}?{query}'.format(
+        res_url = '{scheme}{netloc}{path}?{query}'.format(
             scheme=url['scheme'],
             netloc=url['netloc'],
             path=parsed_value_url.path,
             query=parsed_value_url.query,
         )
     else:
-        target_address = value
+        res_url = value
 
-    return (target_address, parsed_value_path)
+    return {
+        'url': res_url,
+        'file_name': file_name,
+    }
 
 
 def normalize_name(name: str) -> str:
