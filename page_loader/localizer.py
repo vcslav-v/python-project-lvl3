@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from page_loader.net import get_response_content
 from page_loader.parser import get_resource_info
 from page_loader.logger import logger
+from progress.bar import Bar
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
@@ -19,12 +20,15 @@ def localize_resources(
     """Localize the resources page."""
     soup = BeautifulSoup(html_text, 'lxml')
     tags = soup.find_all(RESOURCES_TAGS)
+    bar = Bar('Load resources', max=len(tags))
     for tag in tags:
+        bar.next()
         tag.attrs = localize_tag(
             tag.attrs,
             url,
             output_path
         )
+    bar.finish()
     return soup.prettify(formatter='html5')
 
 
