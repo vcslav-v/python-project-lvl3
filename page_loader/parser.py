@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse
 import os
+from page_loader.logger import logger
 
 RE_URL = (
     r'^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]+)([\/\w \.-]*)*\/?(\??(.?)*)$'
@@ -11,12 +12,13 @@ RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
 def get_url_info(url: str) -> dict:
     """Check the validity of the url, make data dict.
     Returns:
-    {scheme, netloc, path, query, full_url, file_name, res_folder_name}
+    {scheme, netloc, path, query, full_url, file_name, res_dir_name}
     """
     re_checked_url = re.search(RE_URL, url, flags=re.I)
 
     if not re_checked_url:
-        raise ValueError('{url} is not a url'.format(url=url))
+        logger.error('{url} is not a url'.format(url=url))
+        raise ValueError('{url} is not an url'.format(url=url))
 
     parsed_url = urlparse(url)
 
@@ -34,7 +36,7 @@ def get_url_info(url: str) -> dict:
         url_data['full_url'] = url_data['scheme'] + parsed_url.geturl()
 
     url_data['file_name'] = get_url_name(url_data)
-    url_data['res_folder_name'] = url_data['file_name'] + '_files'
+    url_data['res_dir_name'] = url_data['file_name'] + '_files'
 
     return url_data
 
@@ -59,11 +61,13 @@ def get_resource_info(
     file_name = normalize_name(parsed_path) + extention
 
     if not parsed_value_url.scheme:
-        res_url = '{scheme}{netloc}{path}?{query}'.format(
+        res_url = '{scheme}{netloc}{path}{query}'.format(
             scheme=url['scheme'],
             netloc=url['netloc'],
             path=parsed_value_url.path,
-            query=parsed_value_url.query,
+            query=(
+                '?' + parsed_value_url.query if parsed_value_url.query else ''
+            ),
         )
     else:
         res_url = value

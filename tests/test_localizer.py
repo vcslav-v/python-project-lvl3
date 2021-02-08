@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
                 'path': '',
                 'full_url': 'http://test.com',
                 'file_name': 'test-com',
-                'res_folder_name': 'test-com_files'
+                'res_dir_name': 'test-com_files'
             },
             'res_test_html',
             'url_res',
@@ -39,7 +39,7 @@ def test_dowload_resources(
     expect_soup = BeautifulSoup(expect_data, 'lxml')
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        resources_output_path = os.path.join(tmp_dir, url['res_folder_name'])
+        resources_output_path = os.path.join(tmp_dir, url['res_dir_name'])
         with requests_mock.Mocker() as mocker:
             for img_url in mock_img_urls:
                 mocker.get(img_url.strip(), text='img')

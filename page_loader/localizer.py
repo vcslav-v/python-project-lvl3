@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from page_loader.net import get_response_content
 from page_loader.parser import get_resource_info
+from page_loader.logger import logger
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
@@ -39,9 +40,15 @@ def localize_tag(
                 value,
                 url
             )
+            logger.info('Request resource - {url}'.format(url=res_info['url']))
             res_info['data'] = get_response_content(
                 res_info['url'],
                 is_html=False,
+            )
+            logger.info(
+                'Save resource - {file_name}'.format(
+                    file_name=res_info['file_name']
+                )
             )
             save_resource(
                 res_info,
@@ -72,7 +79,7 @@ def save_resource(
 ):
     """Save the resource to disk."""
     full_resources_output_path = os.path.join(
-        output_path, url['res_folder_name']
+        output_path, url['res_dir_name']
     )
 
     if not os.path.exists(full_resources_output_path) or (
@@ -81,6 +88,9 @@ def save_resource(
         try:
             os.mkdir(full_resources_output_path)
         except Exception as e:
+            logger.exception('Make {dir} directory resources error'.format(
+                dir=full_resources_output_path
+            ))
             raise e
 
     file_path = os.path.join(full_resources_output_path, res['file_name'])
@@ -89,4 +99,7 @@ def save_resource(
         with open(file_path, 'wb') as res_file:
             res_file.write(res['data'])
     except Exception as e:
+        logger.exception(
+            'Make file error - {path}'.format(path=file_path)
+        )
         raise e
