@@ -45,7 +45,7 @@ def get_url_name(url: dict) -> str:
     return normalize_name(without_scheme_url)
 
 
-def get_resource_url_data(
+def get_resource_data(
     value: str,
     url: dict
 ) -> dict:

@@ -1,6 +1,6 @@
 import os
 from urllib.parse import urlparse
-from page_loader.parser import get_resource_url_data
+from page_loader.parser import get_resource_data
 
 import requests
 from bs4 import BeautifulSoup
@@ -31,10 +31,10 @@ def localize_src(
     url: dict,
     output_path: str
 ) -> dict:
-    """Localize imgs page."""
+    """Localize res page."""
     for attr, value in attrs.items():
         if is_local_resource(attr, value, url['netloc']):
-            res_data = get_resource_url_data(
+            res_data = get_resource_data(
                 value,
                 url
             )
@@ -70,7 +70,7 @@ def download_resource(
     )
     full_resources_output_path = os.path.join(output_path, output_dir_name)
 
-    img = requests.get(res['url'])
+    res_data = requests.get(res['url'])
 
     if not os.path.exists(full_resources_output_path) or (
         not os.path.isdir(full_resources_output_path)
@@ -80,7 +80,7 @@ def download_resource(
     file_path = os.path.join(full_resources_output_path, res['file_name'])
     local_file_path = os.path.join(output_dir_name, res['file_name'])
 
-    with open(file_path, 'wb') as img_file:
-        img_file.write(img.content)
+    with open(file_path, 'wb') as res_file:
+        res_file.write(res_data.content)
 
     return local_file_path
