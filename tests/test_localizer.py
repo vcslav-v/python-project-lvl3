@@ -1,5 +1,4 @@
 from page_loader.localizer import download_resources
-from page_loader.loader import get_url_name
 import requests_mock
 import os
 import tempfile

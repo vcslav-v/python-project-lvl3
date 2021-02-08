@@ -1,4 +1,5 @@
-from page_loader.loader import download, get_url_data, get_url_name
+from page_loader.loader import download
+from page_loader.parser import get_url_data, get_url_name
 import os
 import requests_mock
 import tempfile
@@ -79,7 +80,7 @@ def test_download(url, mock_url, content_type, data, expect_data, request):
 
         with open(result_path, 'r') as result_file:
             soup = BeautifulSoup(result_file.read(), 'lxml')
-        
+
         expect_soup = BeautifulSoup(expect_data, 'lxml')
         assert soup.prettify(formatter='html5') == (
             expect_soup.prettify(formatter='html5')

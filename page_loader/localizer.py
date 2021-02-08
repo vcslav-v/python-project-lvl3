@@ -1,13 +1,10 @@
 import os
-import re
 from typing import Tuple
 from urllib.parse import urlparse
+from page_loader.parser import normalize_name
 
 import requests
 from bs4 import BeautifulSoup
-
-RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
-RE_IS_RES = r''
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
@@ -113,17 +110,3 @@ def download_resource(
         img_file.write(img.content)
 
     return local_file_path
-
-
-def normalize_name(name: str) -> str:
-    """Make a normalize name from the url.
-    Example:
-    https://google.com -> google-com
-    """
-    name = re.sub(
-        RE_NOT_NUMS_OR_LETTERS,
-        "-",
-        name,
-        flags=re.I
-    )
-    return name
