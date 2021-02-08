@@ -20,6 +20,9 @@ def get_url_info(url: str) -> dict:
         logger.error('{url} is not a url'.format(url=url))
         raise ValueError('{url} is not an url'.format(url=url))
 
+    if '://' not in url:
+        url = 'http://' + url
+
     parsed_url = urlparse(url)
 
     url_data = {
@@ -28,12 +31,8 @@ def get_url_info(url: str) -> dict:
         'query': parsed_url.query
     }
 
-    if parsed_url.scheme:
-        url_data['scheme'] = parsed_url.scheme + '://'
-        url_data['full_url'] = parsed_url.geturl()
-    else:
-        url_data['scheme'] = 'http://'
-        url_data['full_url'] = url_data['scheme'] + parsed_url.geturl()
+    url_data['scheme'] = parsed_url.scheme + '://'
+    url_data['full_url'] = parsed_url.geturl()
 
     url_data['file_name'] = get_url_name(url_data)
     url_data['res_dir_name'] = url_data['file_name'] + '_files'
