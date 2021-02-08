@@ -1,7 +1,6 @@
 import os
-from typing import Tuple
 from urllib.parse import urlparse
-from page_loader.parser import normalize_name
+from page_loader.parser import get_resource_url_name
 
 import requests
 from bs4 import BeautifulSoup
@@ -59,29 +58,6 @@ def is_local_resource(attr: str, value: str, netloc: str) -> bool:
     _, extention = os.path.splitext(parsed_value_url.path.strip('/'))
 
     return extention != ''
-
-
-def get_resource_url_name(
-    value: str,
-    url: dict
-) -> Tuple[str, str]:
-    """Generate the file name by url."""
-    parsed_value_url = urlparse(value)
-
-    parsed_path, extention = os.path.splitext(parsed_value_url.path.strip('/'))
-    parsed_value_path = normalize_name(parsed_path) + extention
-
-    if not parsed_value_url.scheme:
-        target_address = '{scheme}{netloc}{path}?{query}'.format(
-            scheme=url['scheme'],
-            netloc=url['netloc'],
-            path=parsed_value_url.path,
-            query=parsed_value_url.query,
-        )
-    else:
-        target_address = value
-
-    return (target_address, parsed_value_path)
 
 
 def download_resource(
