@@ -5,6 +5,7 @@ import argparse
 from typing import Tuple
 from page_loader import loader
 import os
+import sys
 
 DESCRIPTION = 'Dowload page'
 HELP_STRING = 'Path to download'
@@ -15,8 +16,8 @@ def main():
     url, output_path = get_arguments()
     try:
         print(loader.download(url, output_path))
-    except Exception as e:
-        print(e)
+    except Exception:
+        sys.exit(1)
 
 
 def get_arguments() -> Tuple[str, str]:
