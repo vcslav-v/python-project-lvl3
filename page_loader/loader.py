@@ -30,7 +30,6 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
 
     logger.info('Write html page file.')
     output_file_path = save_page(url_info['file_name'], page, output_path)
-    logger.debug(output_file_path + str(type(output_file_path)))
     return output_file_path
 
 
