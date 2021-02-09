@@ -28,6 +28,6 @@ def get_response_content(url: str, is_html=True) -> bytes:
         content_type = response.headers.get('Content-Type')
 
         if 'text/html' not in str(content_type):
-            logger.warning(ERROR_CONTENT_TYPE.format(url=url))
+            logger.debug(ERROR_CONTENT_TYPE.format(url=url))
 
     return response.content
