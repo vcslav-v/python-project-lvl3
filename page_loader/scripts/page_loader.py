@@ -15,10 +15,11 @@ def main():
     """Page-loader script."""
     url, output_path = get_arguments()
     try:
-        print(loader.download(url, output_path))
+        loader.download(url, output_path)
+        sys.exit(0)
     except Exception as e:
         loader.logger.debug(type(e).__name__)
-        sys.exit(0)
+        sys.exit(1)
 
 
 def get_arguments() -> Tuple[str, str]:
