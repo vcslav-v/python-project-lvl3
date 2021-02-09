@@ -15,11 +15,8 @@ def main():
     """Page-loader script."""
     url, output_path = get_arguments()
     try:
-        result = loader.download(url, output_path)
-        loader.logger.debug(result)
-        return result
-    except Exception as e:
-        loader.logger.debug(e)
+        print(loader.download(url, output_path))
+    except Exception:
         sys.exit(1)
     sys.exit(0)
 
