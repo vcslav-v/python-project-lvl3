@@ -16,7 +16,8 @@ def main():
     url, output_path = get_arguments()
     try:
         print(download(url, output_path))
-    except Exception:
+    except Exception as e:
+        print(e)
         sys.exit(1)
     sys.exit(0)
 
