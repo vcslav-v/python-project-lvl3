@@ -1,5 +1,4 @@
 import os
-import re
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
@@ -106,11 +105,7 @@ def is_local_resource(attr: str, value: str, netloc: str) -> bool:
         return False
 
     parsed_value_url = urlparse(value)
-    re_local_url_pattern = netloc.replace('.', r'\.') + '$'
-
-    if parsed_value_url.netloc and not (
-        re.search(re_local_url_pattern, parsed_value_url.netloc)
-    ):
+    if parsed_value_url.netloc and netloc != parsed_value_url.netloc:
         return False
 
     _, extention = os.path.splitext(parsed_value_url.path.strip('/'))
