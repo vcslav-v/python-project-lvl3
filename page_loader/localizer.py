@@ -19,7 +19,9 @@ def localize_resources(
 ) -> str:
     """Localize the resources page."""
     soup = BeautifulSoup(html_text, 'lxml')
+    logger.debug(soup.prettify(formatter='html5'))
     tags = soup.find_all(RESOURCES_TAGS)
+    logger.debug(tags)
     bar = Bar('Load resources', max=len(tags))
     for tag in tags:
         bar.next()
