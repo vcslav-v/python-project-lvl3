@@ -32,9 +32,13 @@ LOGGING_CONFIG = {
         'root': {
             'handlers': ['file_handler', 'error_handler'],
             'level': 'DEBUG',
+        },
+        'script': {
+            'handlers': ['file_handler', 'error_handler'],
+            'level': 'DEBUG',
         }
     },
 }
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("root")
+logger = logging.getLogger('root')
