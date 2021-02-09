@@ -18,7 +18,7 @@ def main():
         print(loader.download(url, output_path))
     except Exception as e:
         loader.logger.debug(str(e))
-        sys.exit(1)
+        sys.exit(2)
     sys.exit(0)
 
 
