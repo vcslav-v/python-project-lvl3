@@ -30,7 +30,7 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
 
     logger.info('Write html page file.')
     output_file_path = save_page(url_info['file_name'], page, output_path)
-
+    logger.debug(output_file_path + str(type(output_file_path)))
     return output_file_path
 
 
@@ -43,7 +43,6 @@ def save_page(
     file_name = '{url_name}.html'.format(
         url_name=url_file_name
     )
-    logger.debug(file_name)
 
     output_file_path = os.path.join(
         output_path,
@@ -59,5 +58,4 @@ def save_page(
                 path=output_file_path
             ))
         raise e
-    logger.debug(output_file_path)
     return output_file_path
