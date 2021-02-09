@@ -35,7 +35,6 @@ def get_url_info(url: str) -> dict:
     url_data['full_url'] = parsed_url.geturl()
 
     url_data['file_name'] = get_url_name(url_data)
-    url_data['assets_prefix'] = url_data['file_name'] + '-assets-'
     url_data['res_dir_name'] = url_data['file_name'] + '_files'
 
     return url_data
@@ -62,8 +61,8 @@ def get_resource_info(
     if not extention:
         extention = '.html'
 
-    file_name = '{prefix}{name}{extention}'.format(
-        prefix=url['assets_prefix'],
+    file_name = '{prefix}-{name}{extention}'.format(
+        prefix=url['url'],
         name=normalize_name(parsed_path),
         extention=extention
     )
