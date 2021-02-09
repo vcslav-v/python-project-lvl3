@@ -4,7 +4,7 @@
 import argparse
 from typing import Tuple
 from page_loader import download
-import page_loader.loader 
+import page_loader
 import os
 import sys
 
