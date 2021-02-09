@@ -57,7 +57,7 @@ def test_get_url_name(url, expect):
     (
         'https://google.com/',
         'https://google.com/',
-        'text/html',
+        'text/css',
         'test_html',
         'test_html',
     ),
@@ -103,14 +103,6 @@ def test_download(url, mock_url, content_type, data, expect_data, request):
             200,
             ValueError
         ),
-        (
-            'http://google.com',
-            'http://google.com',
-            'text/css',
-            200,
-            ValueError
-        ),
-
     ]
 )
 def test_download_request_errors(

@@ -107,7 +107,4 @@ def is_local_resource(attr: str, value: str, netloc: str) -> bool:
     parsed_value_url = urlparse(value)
     if parsed_value_url.netloc and netloc != parsed_value_url.netloc:
         return False
-
-    _, extention = os.path.splitext(parsed_value_url.path.strip('/'))
-
-    return extention != ''
+    return True
