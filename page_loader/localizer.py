@@ -31,7 +31,7 @@ def localize_resources(
             output_path
         )
     bar.finish()
-    return soup.prettify(formatter='html')
+    return soup.prettify(formatter='html5')
 
 
 def localize_tag(
