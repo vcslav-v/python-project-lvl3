@@ -4,6 +4,7 @@
 import argparse
 from typing import Tuple
 from page_loader import download
+import page_loader.loader 
 import os
 import sys
 
@@ -15,9 +16,9 @@ def main():
     """Page-loader script."""
     url, output_path = get_arguments()
     try:
-        download(url, output_path)
+        print(download(url, output_path))
     except Exception as e:
-        print(e)
+        page_loader.loader.logger.debug(e)
         sys.exit(1)
     sys.exit(0)
 
