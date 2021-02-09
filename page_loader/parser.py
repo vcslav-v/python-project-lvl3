@@ -62,7 +62,7 @@ def get_resource_info(
         extention = '.html'
 
     file_name = '{prefix}-{name}{extention}'.format(
-        prefix=url['url'],
+        prefix=url['file_name'],
         name=normalize_name(parsed_path),
         extention=extention
     )
