@@ -15,7 +15,8 @@ from bs4 import BeautifulSoup
                 'path': '',
                 'full_url': 'http://test.com',
                 'file_name': 'test-com',
-                'res_dir_name': 'test-com_files'
+                'res_dir_name': 'test-com_files',
+                'assets_prefix': 'test-com',
             },
             'res_test_html',
             'url_res',
