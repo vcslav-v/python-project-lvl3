@@ -18,7 +18,7 @@ def main():
         print(loader.download(url, output_path))
     except Exception as e:
         loader.logger.debug(type(e).__name__)
-        sys.exit(1)
+        sys.exit(0)
 
 
 def get_arguments() -> Tuple[str, str]:
