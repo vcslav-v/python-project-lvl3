@@ -32,10 +32,6 @@ LOGGING_CONFIG = {
         'root': {
             'handlers': ['file_handler', 'error_handler'],
             'level': 'DEBUG',
-        },
-        'script': {
-            'handlers': ['file_handler', 'error_handler'],
-            'level': 'DEBUG',
         }
     },
 }
