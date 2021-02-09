@@ -16,7 +16,8 @@ def main():
     url, output_path = get_arguments()
     try:
         print(loader.download(url, output_path))
-    except Exception:
+    except Exception as e:
+        loader.logger.debug(e)
         sys.exit(1)
 
 
