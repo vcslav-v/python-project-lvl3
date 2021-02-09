@@ -17,9 +17,9 @@ def main():
     url, output_path = get_arguments()
 
     try:
-        logger.debug('Start')
+        logger.ERROR('Start')
         print(download(url, output_path))
-        logger.debug('End')
+        logger.ERROR('End')
     except Exception:
         sys.exit(1)
     sys.exit(0)
