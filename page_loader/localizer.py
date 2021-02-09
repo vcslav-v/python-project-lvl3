@@ -18,7 +18,7 @@ def localize_resources(
     output_path: str,
 ) -> str:
     """Localize the resources page."""
-    soup = BeautifulSoup(html_text, 'lxml')
+    soup = BeautifulSoup(html_text, 'html.parser')
     logger.debug(html_text)
     tags = soup.find_all(RESOURCES_TAGS)
     logger.debug(tags)
