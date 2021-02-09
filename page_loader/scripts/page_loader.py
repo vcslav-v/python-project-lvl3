@@ -4,7 +4,7 @@
 import argparse
 from typing import Tuple
 from page_loader import download
-from page_loader.logger import logger
+from page_loader.loader import logger
 import os
 import sys
 
@@ -15,11 +15,10 @@ HELP_STRING = 'Path to download'
 def main():
     """Page-loader script."""
     url, output_path = get_arguments()
-
     try:
-        logger.ERROR('Start')
+        logger.debug('start')
         print(download(url, output_path))
-        logger.ERROR('End')
+        logger.debug('fin')
     except Exception:
         sys.exit(1)
     sys.exit(0)
