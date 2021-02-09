@@ -4,6 +4,7 @@
 import argparse
 from typing import Tuple
 from page_loader import loader
+from page_loader.logger import logger
 import os
 import sys
 
@@ -17,8 +18,8 @@ def main():
     try:
         print(loader.download(url, output_path))
     except Exception as e:
-        loader.logger.debug(str(e))
-        sys.exit(2)
+        logger.debug(str(e))
+        sys.exit(1)
     sys.exit(0)
 
 
