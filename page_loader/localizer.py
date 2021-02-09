@@ -1,12 +1,13 @@
 import os
+import re
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
+from progress.bar import Bar
 
+from page_loader.logger import logger
 from page_loader.net import get_response_content
 from page_loader.parser import get_resource_info
-from page_loader.logger import logger
-from progress.bar import Bar
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
@@ -65,19 +66,6 @@ def localize_tag(
     return attrs
 
 
-def is_local_resource(attr: str, value: str, netloc: str) -> bool:
-    if not isinstance(value, str) or attr not in RES_ATTR:
-        return False
-
-    parsed_value_url = urlparse(value)
-    if parsed_value_url.netloc and netloc != parsed_value_url.netloc:
-        return False
-
-    _, extention = os.path.splitext(parsed_value_url.path.strip('/'))
-
-    return extention != ''
-
-
 def save_resource(
     res: dict,
     url: dict,
@@ -111,3 +99,20 @@ def save_resource(
                 path=file_path
             ))
         raise e
+
+
+def is_local_resource(attr: str, value: str, netloc: str) -> bool:
+    if not isinstance(value, str) or attr not in RES_ATTR:
+        return False
+
+    parsed_value_url = urlparse(value)
+    re_local_url_pattern = netloc.replace('.', r'\.') + '$'
+
+    if parsed_value_url.netloc and not (
+        re.search(re_local_url_pattern, parsed_value_url.netloc)
+    ):
+        return False
+
+    _, extention = os.path.splitext(parsed_value_url.path.strip('/'))
+
+    return extention != ''
