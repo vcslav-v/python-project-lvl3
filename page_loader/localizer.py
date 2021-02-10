@@ -94,9 +94,9 @@ def save_resource(
             res_file.write(res['data'])
     except Exception as e:
         logger.error('{ex}: file {path} is not saved'.format(
-                ex=type(e).__name__,
-                path=file_path
-            ))
+            ex=type(e).__name__,
+            path=file_path
+        ))
         raise e
 
 

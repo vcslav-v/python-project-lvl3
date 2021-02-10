@@ -109,7 +109,7 @@ def test_download_request_errors(
         with requests_mock.Mocker() as mocker:
             mocker.get(mock_url, headers={
                 'Content-Type': content_type,
-                }, status_code=status_code
+            }, status_code=status_code
             )
             with pytest.raises(error_type):
                 download(url, tmp_dir)
@@ -124,7 +124,7 @@ def test_download_dir_not_exist():
 
 @pytest.mark.parametrize(
     (
-        'url, html_data, expect_html_data, expect_res_path, ' +
+        'url, html_data, expect_html_data, expect_res_path, '
         'expect_page_file_name, urls_res, expect_files'
     ),
     [
