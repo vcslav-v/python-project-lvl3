@@ -17,8 +17,7 @@ def get_url_info(url: str) -> dict:
     re_checked_url = re.search(RE_URL, url, flags=re.I)
 
     if not re_checked_url:
-        logger.error('{url} is not a url'.format(url=url))
-        raise ValueError('{url} is not an url'.format(url=url))
+        logger.warning('{url} is not a url'.format(url=url))
 
     if '://' not in url:
         url = 'http://' + url
@@ -35,7 +34,6 @@ def get_url_info(url: str) -> dict:
     url_data['full_url'] = parsed_url.geturl()
 
     url_data['file_name'] = get_url_name(url_data)
-    url_data['assets_prefix'] = normalize_name(url_data['netloc'])
     url_data['res_dir_name'] = url_data['file_name'] + '_files'
 
     return url_data
@@ -57,18 +55,12 @@ def get_resource_info(
     """
     parsed_value_url = urlparse(value)
 
-    parsed_path, extention = os.path.splitext(parsed_value_url.path.strip('/'))
+    parsed_path, extention = os.path.splitext(parsed_value_url.path)
 
     if not extention:
         extention = '.html'
 
-    file_name = '{prefix}-{name}{extention}'.format(
-        prefix=url['assets_prefix'],
-        name=normalize_name(parsed_path),
-        extention=extention
-    )
-
-    if not parsed_value_url.scheme:
+    if not parsed_value_url.scheme and parsed_value_url.path[0] == '/':
         res_url = '{scheme}{netloc}{path}{query}'.format(
             scheme=url['scheme'],
             netloc=url['netloc'],
@@ -77,8 +69,23 @@ def get_resource_info(
                 '?' + parsed_value_url.query if parsed_value_url.query else ''
             ),
         )
+    elif not parsed_value_url.scheme:
+        res_url = '{scheme}{netloc}{path}{local_path}{query}'.format(
+            scheme=url['scheme'],
+            netloc=url['netloc'],
+            path=url['path'],
+            local_path=parsed_value_url.path,
+            query=(
+                '?' + parsed_value_url.query if parsed_value_url.query else ''
+            ),
+        )
     else:
         res_url = value
+
+    file_name = '{name}{extention}'.format(
+        name=normalize_name(url['netloc'] + parsed_path),
+        extention=extention
+    )
 
     local_path = os.path.join(
         '{url_name}_files'.format(url_name=url['file_name']),
