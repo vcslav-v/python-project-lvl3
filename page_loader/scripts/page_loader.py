@@ -3,7 +3,7 @@
 
 import argparse
 from typing import Tuple
-from page_loader import loader
+from page_loader import download
 import os
 import sys
 
@@ -14,10 +14,12 @@ HELP_STRING = 'Path to download'
 def main():
     """Page-loader script."""
     url, output_path = get_arguments()
+    exit_status = 0
     try:
-        print(loader.download(url, output_path))
+        print(download(url, output_path))
     except Exception:
-        sys.exit(1)
+        exit_status = 1
+    sys.exit(exit_status)
 
 
 def get_arguments() -> Tuple[str, str]:

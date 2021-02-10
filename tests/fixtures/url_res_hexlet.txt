@@ -1,0 +1,3 @@
+http://site.com/blog/about/assets/styles.css
+http://site.com/photos/me.jpg
+http://site.com/assets/scripts.js

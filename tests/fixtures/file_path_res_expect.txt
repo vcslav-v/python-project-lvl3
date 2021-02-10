@@ -1,5 +1,5 @@
-assets-icons-meta-DDG-icon-256x256.png
-assets-professions-nodejs.png
-assets-home-landing-icons-search.svg
-packs-js-runtime.js
-assets-application.css
+test-com-assets-icons-meta-DDG-icon-256x256.png
+test-com-assets-professions-nodejs.png
+test-com-assets-home-landing-icons-search.svg
+test-com-packs-js-runtime.js
+test-com-assets-application.css

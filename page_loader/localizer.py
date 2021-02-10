@@ -2,11 +2,11 @@ import os
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
+from progress.bar import Bar
 
+from page_loader.logger import logger
 from page_loader.net import get_response_content
 from page_loader.parser import get_resource_info
-from page_loader.logger import logger
-from progress.bar import Bar
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
@@ -18,8 +18,10 @@ def localize_resources(
     output_path: str,
 ) -> str:
     """Localize the resources page."""
-    soup = BeautifulSoup(html_text, 'lxml')
+    soup = BeautifulSoup(html_text, 'html.parser')
+    logger.debug(html_text)
     tags = soup.find_all(RESOURCES_TAGS)
+    logger.debug(tags)
     bar = Bar('Load resources', max=len(tags))
     for tag in tags:
         bar.next()
@@ -63,19 +65,6 @@ def localize_tag(
     return attrs
 
 
-def is_local_resource(attr: str, value: str, netloc: str) -> bool:
-    if not isinstance(value, str) or attr not in RES_ATTR:
-        return False
-
-    parsed_value_url = urlparse(value)
-    if parsed_value_url.netloc and netloc != parsed_value_url.netloc:
-        return False
-
-    _, extention = os.path.splitext(parsed_value_url.path.strip('/'))
-
-    return extention != ''
-
-
 def save_resource(
     res: dict,
     url: dict,
@@ -105,7 +94,17 @@ def save_resource(
             res_file.write(res['data'])
     except Exception as e:
         logger.error('{ex}: file {path} is not saved'.format(
-                ex=type(e).__name__,
-                path=file_path
-            ))
+            ex=type(e).__name__,
+            path=file_path
+        ))
         raise e
+
+
+def is_local_resource(attr: str, value: str, netloc: str) -> bool:
+    if not isinstance(value, str) or attr not in RES_ATTR:
+        return False
+
+    parsed_value_url = urlparse(value)
+    if parsed_value_url.netloc and netloc != parsed_value_url.netloc:
+        return False
+    return True

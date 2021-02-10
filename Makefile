@@ -57,5 +57,9 @@ install:
 
 test:
 	poetry run pytest tests/
+package-install:
+	python3 -m pip -q install poetry
+	poetry build -q
+	python3 -m pip -q install --user dist/*.whl
 coverage:
 	poetry run pytest --cov=page_loader --cov-report xml tests/

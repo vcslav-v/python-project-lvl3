@@ -30,7 +30,6 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
 
     logger.info('Write html page file.')
     output_file_path = save_page(url_info['file_name'], page, output_path)
-
     return output_file_path
 
 
@@ -54,9 +53,8 @@ def save_page(
             output_file.write(page)
     except Exception as e:
         logger.error('{ex}: {path}'.format(
-                ex=type(e).__name__,
-                path=output_file_path
-            ))
+            ex=type(e).__name__,
+            path=output_file_path
+        ))
         raise e
-
     return output_file_path

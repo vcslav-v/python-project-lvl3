@@ -57,7 +57,7 @@ def test_get_url_name(url, expect):
     (
         'https://google.com/',
         'https://google.com/',
-        'text/html',
+        'text/css',
         'test_html',
         'test_html',
     ),
@@ -96,21 +96,6 @@ def test_download(url, mock_url, content_type, data, expect_data, request):
             301,
             ConnectionError
         ),
-        (
-            'googlecom',
-            'http://google.com',
-            'text/html',
-            200,
-            ValueError
-        ),
-        (
-            'http://google.com',
-            'http://google.com',
-            'text/css',
-            200,
-            ValueError
-        ),
-
     ]
 )
 def test_download_request_errors(
@@ -124,7 +109,7 @@ def test_download_request_errors(
         with requests_mock.Mocker() as mocker:
             mocker.get(mock_url, headers={
                 'Content-Type': content_type,
-                }, status_code=status_code
+            }, status_code=status_code
             )
             with pytest.raises(error_type):
                 download(url, tmp_dir)
@@ -135,3 +120,55 @@ def test_download_dir_not_exist():
     with tempfile.TemporaryDirectory() as tmp_dir:
         with pytest.raises(FileNotFoundError):
             download(URL, os.path.join(tmp_dir, 'temp'))
+
+
+@pytest.mark.parametrize(
+    (
+        'url, html_data, expect_html_data, expect_res_path, '
+        'expect_page_file_name, urls_res, expect_files'
+    ),
+    [
+        (
+            'http://site.com/blog/about',
+            'hexlet_case_html',
+            'hexlet_case_expect_html',
+            'site-com-blog-about_files',
+            'site-com-blog-about.html',
+            'url_res_hexlet',
+            'file_path_res_hexlet_expect',
+        ),
+    ]
+)
+def test_download_hexlet(
+    url,
+    html_data,
+    expect_html_data,
+    expect_res_path,
+    expect_page_file_name,
+    urls_res,
+    expect_files,
+    request
+):
+    html_data = request.getfixturevalue(html_data)
+    expect_html_data = request.getfixturevalue(expect_html_data)
+    urls_res = request.getfixturevalue(urls_res)
+    expect_files = request.getfixturevalue(expect_files)
+    expect_soup = BeautifulSoup(expect_html_data, 'html.parser')
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url, text=html_data)
+            for url_res in urls_res:
+                mocker.get(url_res.strip(), text='img')
+            result_path = download(url, tmp_dir)
+        expect_path = os.path.join(
+            tmp_dir,
+            expect_page_file_name
+        )
+        assert result_path == expect_path
+
+        with open(result_path, 'r') as result_file:
+            soup = BeautifulSoup(result_file.read(), 'html.parser')
+        expect_html = expect_soup.prettify(formatter='html5')
+        result_html = soup.prettify(formatter='html5')
+        assert expect_html == result_html

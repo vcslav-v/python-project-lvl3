@@ -1,7 +1,7 @@
 import requests
 from page_loader.logger import logger
 
-ERROR_RESPONSE_STATUS = 'Response code is {status} 200. URL is {url}'
+ERROR_RESPONSE_STATUS = 'Response code is {status}. URL is {url}'
 ERROR_CONTENT_TYPE = 'In response is not html document. URL is {url}'
 
 
@@ -25,10 +25,9 @@ def get_response_content(url: str, is_html=True) -> bytes:
         )
 
     if is_html:
-        content_type = response.headers['Content-Type'].split(';')[0].strip()
+        content_type = response.headers.get('Content-Type')
 
-        if content_type != 'text/html':
-            logger.error(ERROR_CONTENT_TYPE.format(url=url))
-            raise ValueError(ERROR_CONTENT_TYPE.format(url=url))
+        if 'text/html' not in str(content_type):
+            logger.warning(ERROR_CONTENT_TYPE.format(url=url))
 
     return response.content
