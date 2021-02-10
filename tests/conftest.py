@@ -42,3 +42,35 @@ def url_res():
     with open(os.path.join(fixtures_path, 'url_res.txt')) as fixture_file:
         fixture_data = fixture_file.readlines()
     return fixture_data
+
+
+@pytest.fixture
+def hexlet_case_html():
+    with open(os.path.join(fixtures_path, 'hexlet_case.html')) as fixture_file:
+        fixture_data = fixture_file.read()
+    return fixture_data
+
+
+@pytest.fixture
+def hexlet_case_expect_html():
+    with open(
+        os.path.join(fixtures_path, 'hexlet_case_expect.html')
+    ) as fixture_file:
+        fixture_data = fixture_file.read()
+    return fixture_data
+
+
+@pytest.fixture
+def file_path_res_hexlet_expect():
+    with open(
+        os.path.join(fixtures_path, 'file_path_res_hexlet_expect.txt')
+    ) as fixture_file:
+        fixture_data = fixture_file.readlines()
+    return fixture_data
+
+
+@pytest.fixture
+def url_res_hexlet():
+    with open(os.path.join(fixtures_path, 'url_res_hexlet.txt')) as fixture_file:
+        fixture_data = fixture_file.readlines()
+    return fixture_data

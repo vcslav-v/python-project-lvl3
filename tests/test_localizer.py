@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
             'url_res',
             'res_test_expect_html',
             'file_path_res_expect',
-        )
+        ),
     ]
 )
 def test_dowload_resources(
@@ -57,6 +57,6 @@ def test_dowload_resources(
 
     soup = BeautifulSoup(result_html, 'lxml')
 
-    assert soup.prettify(formatter='html5') == (
-        expect_soup.prettify(formatter='html5')
-    )
+    expect_html = expect_soup.prettify(formatter='html5')
+    result_html = soup.prettify(formatter='html5')
+    assert expect_html == result_html

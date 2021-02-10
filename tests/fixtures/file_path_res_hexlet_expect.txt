@@ -1,0 +1,4 @@
+site-com-blog-about-assets-styles.css
+site-com-assets-scripts.js
+site-com-photos-me.jpg
+site-com-blog-about.html
