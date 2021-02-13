@@ -1,11 +1,11 @@
 import requests
-from page_loader.logger import logger
+from logging import Logger
 
 ERROR_RESPONSE_STATUS = 'Response code is {status}. URL is {url}'
 ERROR_CONTENT_TYPE = 'In response is not html document. URL is {url}'
 
 
-def get(url: str, is_html=True) -> bytes:
+def get(url: str, logger: Logger, is_html=True) -> bytes:
     """Load the content."""
     try:
         with requests.Session() as session:

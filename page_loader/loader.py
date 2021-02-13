@@ -1,10 +1,49 @@
+import logging
+import logging.config
 import os
 from typing import List
 
 from progress.bar import Bar
 
 from page_loader import http, localizer, names, parsed_url
-from page_loader.logger import logger
+
+LOGGING_CONFIG = {
+    'version': 1,
+    'formatters': {
+        'standart': {
+            'format': '%(asctime)s - %(levelname)s: %(message)s'
+        },
+        'error': {
+            'format': '%(levelname)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'file_handler': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'filename': 'page_loader.log',
+            'mode': 'a',
+            'maxBytes': 10240,
+            'backupCount': 0,
+            'formatter': 'standart',
+        },
+        'error_handler': {
+            'class': 'logging.StreamHandler',
+            'level': 'ERROR',
+            'stream': 'ext://sys.stderr',
+            'formatter': 'error',
+        },
+    },
+    'loggers': {
+        'root': {
+            'handlers': ['file_handler', 'error_handler'],
+            'level': 'DEBUG',
+        }
+    },
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger('root')
 
 
 def download(url: str, output_path: str = os.getcwd()) -> str:
@@ -20,7 +59,7 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     url_info = parsed_url.get(url)
 
     logger.info('Request to {url}'.format(url=url_info['full_url']))
-    page_data = http.get(url_info['full_url']).decode()
+    page_data = http.get(url_info['full_url'], logger).decode()
 
     logger.info('Get resources from page.')
     local_res_dir = '{url_name}_files'.format(
@@ -38,7 +77,9 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
 
     logger.info('Start download resources.')
     for resource in resources:
-        resource['data'] = http.get(resource['full_url'], is_html=False)
+        resource['data'] = http.get(
+            resource['full_url'], logger, is_html=False
+        )
 
     logger.info('Write resource files.')
     _save_resources(resources, output_path, local_res_dir)

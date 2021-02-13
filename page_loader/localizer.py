@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 from progress.bar import Bar
 
 from page_loader import names, parsed_url
-from page_loader.logger import logger
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
@@ -21,7 +20,6 @@ def get_page_and_resources(
     """Localize the resources page."""
     soup = BeautifulSoup(page_data, 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
-    logger.debug(tags)
     bar = Bar('Parsing resources', max=len(tags))
     resources = []
     for tag in tags:

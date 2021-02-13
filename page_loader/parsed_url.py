@@ -1,11 +1,5 @@
-import re
 from urllib.parse import urlparse
 import os
-from page_loader.logger import logger
-
-RE_URL = (
-    r'^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]+)([\/\w \.-]*)*\/?(\??(.?)*)$'
-)
 
 
 def get(url: str) -> dict:
@@ -13,10 +7,6 @@ def get(url: str) -> dict:
     Returns:
     {scheme, netloc, path, query, full_url, file_name, res_dir_name}
     """
-    re_checked_url = re.search(RE_URL, url, flags=re.I)
-
-    if not re_checked_url:
-        logger.warning('{url} is not a url'.format(url=url))
 
     if '://' not in url:
         url = 'http://' + url
