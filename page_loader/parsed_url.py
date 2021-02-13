@@ -6,10 +6,9 @@ from page_loader.logger import logger
 RE_URL = (
     r'^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]+)([\/\w \.-]*)*\/?(\??(.?)*)$'
 )
-RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
 
 
-def get_url_info(url: str) -> dict:
+def get(url: str) -> dict:
     """Check the validity of the url, make data dict.
     Returns:
     {scheme, netloc, path, query, full_url, file_name, res_dir_name}
@@ -36,14 +35,7 @@ def get_url_info(url: str) -> dict:
     return url_data
 
 
-def get_file_name(url: dict) -> str:
-    """Generate the page name by url."""
-    parsed_path, _ = os.path.splitext(url['path'])
-    without_scheme_url = url['netloc'] + parsed_path
-    return _normalize_name(without_scheme_url)
-
-
-def get_resource_info(
+def get_for_res(
     value: str,
     url: dict
 ) -> dict:
@@ -84,24 +76,3 @@ def get_resource_info(
         'path': parsed_path,
         'extention': extention
     }
-
-
-def get_resource_file_name(url, res_info):
-    return '{name}{extention}'.format(
-                    name=_normalize_name(url['netloc'] + res_info['path']),
-                    extention=res_info['extention']
-            )
-
-
-def _normalize_name(name: str) -> str:
-    """Make a normalize name from the url.
-    Example:
-    https://google.com -> google-com
-    """
-    name = re.sub(
-        RE_NOT_NUMS_OR_LETTERS,
-        "-",
-        name,
-        flags=re.I
-    )
-    return name

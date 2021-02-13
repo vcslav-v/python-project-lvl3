@@ -1,35 +1,9 @@
 from page_loader.loader import download
-from page_loader.parser import get_file_name
 import os
 import requests_mock
 import tempfile
 import pytest
 from bs4 import BeautifulSoup
-
-
-@pytest.mark.parametrize('url, expect', [
-    ({
-        'scheme': 'https://',
-        'netloc': 'google.com',
-        'path': '',
-        'full_url': 'https://google.com'
-    }, 'google-com'),
-    ({
-        'scheme': 'https://',
-        'netloc': 'TeST.com',
-        'path': '/index.html',
-        'full_url': 'https://TeST.com/index.html'
-    }, 'TeST-com-index'),
-    ({
-        'scheme': 'ftp://',
-        'netloc': 'ru.wikipedia.org',
-        'path': '/wiki/%D0%81',
-        'full_url': 'ru.wikipedia.org/wiki/%D0%81'
-    }, 'ru-wikipedia-org-wiki-D0-81'),
-])
-def test_get_url_name(url, expect):
-    result = get_file_name(url)
-    assert result == expect
 
 
 @pytest.mark.parametrize(

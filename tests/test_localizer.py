@@ -1,4 +1,4 @@
-from page_loader.localizer import localize_resources
+from page_loader.localizer import get_page
 import requests_mock
 import os
 import tempfile
@@ -45,7 +45,7 @@ def test_dowload_resources(
         with requests_mock.Mocker() as mocker:
             for img_url in mock_img_urls:
                 mocker.get(img_url.strip(), text='img')
-            result_html = localize_resources(url, tmp_dir)
+            result_html = get_page(url, tmp_dir)
 
         assert os.path.exists(resources_output_path) and (
             os.path.isdir(resources_output_path)

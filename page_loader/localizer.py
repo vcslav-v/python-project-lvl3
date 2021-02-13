@@ -4,15 +4,14 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from progress.bar import Bar
 
+from page_loader import http, names, parsed_url
 from page_loader.logger import logger
-from page_loader.net import get_response_content
-from page_loader import parser
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
-def localize_resources(
+def get_page(
     url: dict,
     output_path: str,
 ) -> str:
@@ -22,7 +21,7 @@ def localize_resources(
     logger.debug(tags)
     bar = Bar('Load resources', max=len(tags))
     local_res_dir = '{url_name}_files'.format(
-        url_name=parser.get_file_name(url)
+        url_name=names.get_for_url(url)
     )
     full_path_res_dir = os.path.join(output_path, local_res_dir)
     for tag in tags:
@@ -46,22 +45,19 @@ def _localize_tag(
     """Localize tag attrs."""
     for attr, value in attrs.items():
         if _is_local_resource(attr, value, url['netloc']):
-            res_info = parser.get_resource_info(
+            res_info = parsed_url.get_for_res(
                 value,
                 url
             )
 
-            res_info['file_name'] = parser.get_resource_file_name(
+            res_info['file_name'] = names.get_for_res(
                 url, res_info
             )
 
             logger.info(
                 'Request resource - {url}'.format(url=res_info['full_url'])
             )
-            res_info['data'] = get_response_content(
-                res_info['full_url'],
-                is_html=False,
-            )
+            res_info['data'] = http.get(res_info['full_url'], is_html=False)
 
             logger.info(
                 'Save resource - {file_name}'.format(
