@@ -1,23 +1,12 @@
-import re
 from urllib.parse import urlparse
 import os
-from page_loader.logger import logger
-
-RE_URL = (
-    r'^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]+)([\/\w \.-]*)*\/?(\??(.?)*)$'
-)
-RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
 
 
-def get_url_info(url: str) -> dict:
+def get(url: str) -> dict:
     """Check the validity of the url, make data dict.
     Returns:
     {scheme, netloc, path, query, full_url, file_name, res_dir_name}
     """
-    re_checked_url = re.search(RE_URL, url, flags=re.I)
-
-    if not re_checked_url:
-        logger.warning('{url} is not a url'.format(url=url))
 
     if '://' not in url:
         url = 'http://' + url
@@ -33,25 +22,15 @@ def get_url_info(url: str) -> dict:
     url_data['scheme'] = parsed_url.scheme + '://'
     url_data['full_url'] = parsed_url.geturl()
 
-    url_data['file_name'] = get_url_name(url_data)
-    url_data['res_dir_name'] = url_data['file_name'] + '_files'
-
     return url_data
 
 
-def get_url_name(url: dict) -> str:
-    """Generate the page name by url."""
-    parsed_path, _ = os.path.splitext(url['path'])
-    without_scheme_url = url['netloc'] + parsed_path
-    return normalize_name(without_scheme_url)
-
-
-def get_resource_info(
+def get_for_res(
     value: str,
     url: dict
 ) -> dict:
     """Generate the resource info.
-    {'url', 'file_name', 'local_path'}
+    {'full_url', 'path', 'extention'}
     """
     parsed_value_url = urlparse(value)
 
@@ -82,32 +61,8 @@ def get_resource_info(
     else:
         res_url = value
 
-    file_name = '{name}{extention}'.format(
-        name=normalize_name(url['netloc'] + parsed_path),
-        extention=extention
-    )
-
-    local_path = os.path.join(
-        '{url_name}_files'.format(url_name=url['file_name']),
-        file_name
-    )
-
     return {
-        'url': res_url,
-        'file_name': file_name,
-        'local_path': local_path
+        'full_url': res_url,
+        'path': parsed_path,
+        'extention': extention
     }
-
-
-def normalize_name(name: str) -> str:
-    """Make a normalize name from the url.
-    Example:
-    https://google.com -> google-com
-    """
-    name = re.sub(
-        RE_NOT_NUMS_OR_LETTERS,
-        "-",
-        name,
-        flags=re.I
-    )
-    return name

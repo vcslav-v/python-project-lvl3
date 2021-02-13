@@ -1,68 +1,57 @@
 from page_loader.loader import download
-from page_loader.parser import get_url_info, get_url_name
 import os
 import requests_mock
 import tempfile
 import pytest
 from bs4 import BeautifulSoup
+from requests import HTTPError
 
 
-@pytest.mark.parametrize('url, expect', [
-    ({
-        'scheme': 'https://',
-        'netloc': 'google.com',
-        'path': '',
-        'full_url': 'https://google.com'
-    }, 'google-com'),
-    ({
-        'scheme': 'https://',
-        'netloc': 'TeST.com',
-        'path': '/index.html',
-        'full_url': 'https://TeST.com/index.html'
-    }, 'TeST-com-index'),
-    ({
-        'scheme': 'ftp://',
-        'netloc': 'ru.wikipedia.org',
-        'path': '/wiki/%D0%81',
-        'full_url': 'ru.wikipedia.org/wiki/%D0%81'
-    }, 'ru-wikipedia-org-wiki-D0-81'),
-])
-def test_get_url_name(url, expect):
-    result = get_url_name(url)
-    assert result == expect
-
-
-@pytest.mark.parametrize('url, mock_url, content_type, data, expect_data', [
-    (
-        'http://google.com',
-        'http://google.com',
-        'text/html; charset=UTF-8',
-        'test_html',
-        'test_html'
-    ),
-    (
-        'google.com',
-        'http://google.com',
-        'text/html',
-        'test_html',
-        'test_html'
-    ),
-    (
-        'https://google.com/index.html',
-        'https://google.com/index.html',
-        'text/html',
-        'test_html',
-        'test_html',
-    ),
-    (
-        'https://google.com/',
-        'https://google.com/',
-        'text/css',
-        'test_html',
-        'test_html',
-    ),
-])
-def test_download(url, mock_url, content_type, data, expect_data, request):
+@pytest.mark.parametrize(
+    'url, mock_url, html_file_expect, content_type, data, expect_data', [
+        (
+            'http://google.com',
+            'http://google.com',
+            'google-com.html',
+            'text/html; charset=UTF-8',
+            'simple_html',
+            'simple_html'
+        ),
+        (
+            'google.com',
+            'http://google.com',
+            'google-com.html',
+            'text/html',
+            'simple_html',
+            'simple_html'
+        ),
+        (
+            'https://google.com/index.html',
+            'https://google.com/index.html',
+            'google-com-index.html',
+            'text/html',
+            'simple_html',
+            'simple_html',
+        ),
+        (
+            'https://google.com/',
+            'https://google.com/',
+            'google-com.html',
+            'text/css',
+            'simple_html',
+            'simple_html',
+        ),
+    ]
+)
+def test_download(
+    url,
+    mock_url,
+    html_file_expect,
+    content_type,
+    data,
+    expect_data,
+    request
+):
     data = request.getfixturevalue(data)
     expect_data = request.getfixturevalue(expect_data)
 
@@ -74,7 +63,7 @@ def test_download(url, mock_url, content_type, data, expect_data, request):
             result_path = download(url, tmp_dir)
         expect_path = os.path.join(
             tmp_dir,
-            get_url_name(get_url_info(url)) + '.html'
+            html_file_expect,
         )
         assert result_path == expect_path
 
@@ -93,8 +82,8 @@ def test_download(url, mock_url, content_type, data, expect_data, request):
             'http://google.com',
             'http://google.com',
             'text/html',
-            301,
-            ConnectionError
+            501,
+            HTTPError
         ),
     ]
 )
@@ -130,12 +119,12 @@ def test_download_dir_not_exist():
     [
         (
             'http://site.com/blog/about',
-            'hexlet_case_html',
-            'hexlet_case_expect_html',
+            'res_test_2_html',
+            'res_test_2_expect_html',
             'site-com-blog-about_files',
             'site-com-blog-about.html',
-            'url_res_hexlet',
-            'file_path_res_hexlet_expect',
+            'res_urls_2',
+            'res_file_path_expect_2',
         ),
     ]
 )
