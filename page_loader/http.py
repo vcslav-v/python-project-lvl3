@@ -10,11 +10,9 @@ def get(url: str, is_html=True) -> bytes:
     try:
         with requests.Session() as session:
             response = session.get(url)
-    except Exception as e:
-        logger.error('{ex}: URL is {url}'.format(
-            ex=type(e).__name__, url=url)
-        )
-        raise e
+    except ConnectionError:
+        logger.error('ConnectionError: URL is {url}'.format(url=url))
+        raise ConnectionError('URL is {url}'.format(url=url))
     response.raise_for_status()
 
     if is_html:
