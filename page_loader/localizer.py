@@ -13,10 +13,11 @@ RES_ATTR = {'src', 'href'}
 
 def get_page(
     url: dict,
+    page_data: str,
     output_path: str,
 ) -> str:
     """Localize the resources page."""
-    soup = BeautifulSoup(url['data'], 'html.parser')
+    soup = BeautifulSoup(page_data, 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
     logger.debug(tags)
     bar = Bar('Load resources', max=len(tags))
