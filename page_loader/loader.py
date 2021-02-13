@@ -19,12 +19,35 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     logger.info('Request to {url}'.format(url=url_info['full_url']))
     page_data = http.get(url_info['full_url']).decode()
 
+    local_res_dir = '{url_name}_files'.format(
+        url_name=names.get_for_url(url_info)
+    )
+    full_path_res_dir = os.path.join(output_path, local_res_dir)
     logger.info('Start download resources.')
-    page_data = localizer.get_page(
+    page_data, resources = localizer.get_page(
         url_info,
         page_data,
+        local_res_dir,
         output_path
     )
+
+    if not os.path.exists(full_path_res_dir) or (
+        not os.path.isdir(full_path_res_dir)
+    ):
+        try:
+            os.mkdir(full_path_res_dir)
+        except Exception as e:
+            logger.error('{ex}: directory {dir} is not maked'.format(
+                ex=type(e).__name__,
+                dir=full_path_res_dir
+            ))
+            raise e
+
+    for resource in resources:
+        data = http.get(resource['full_url'])
+        _save(data, os.path.join(
+            full_path_res_dir, resource['file_name'])
+        )
 
     output_page_file_path = os.path.join(
         output_path,
@@ -33,18 +56,18 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
         ),
     )
     logger.info('Write html page file.')
-    output_file_path = _save(page_data, output_page_file_path)
+    output_file_path = _save(page_data.encode('UTF-8'), output_page_file_path)
     return output_file_path
 
 
 def _save(
-    page_data: str,
+    data: bytes,
     output_path: str
 ) -> str:
     """Save the html page to disk."""
     try:
-        with open(output_path, 'w') as output_file:
-            output_file.write(page_data)
+        with open(output_path, 'wb') as output_file:
+            output_file.write(data)
     except Exception as e:
         logger.error('{ex}: {path}'.format(
             ex=type(e).__name__,

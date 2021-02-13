@@ -1,10 +1,11 @@
 import os
 from urllib.parse import urlparse
+from typing import Tuple, List
 
 from bs4 import BeautifulSoup
 from progress.bar import Bar
 
-from page_loader import http, names, parsed_url
+from page_loader import names, parsed_url
 from page_loader.logger import logger
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
@@ -14,63 +15,46 @@ RES_ATTR = {'src', 'href'}
 def get_page(
     url: dict,
     page_data: str,
+    local_res_dir: str,
     output_path: str,
-) -> str:
+) -> Tuple[str, List[dict]]:
     """Localize the resources page."""
     soup = BeautifulSoup(page_data, 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
     logger.debug(tags)
     bar = Bar('Load resources', max=len(tags))
-    local_res_dir = '{url_name}_files'.format(
-        url_name=names.get_for_url(url)
-    )
-    full_path_res_dir = os.path.join(output_path, local_res_dir)
+    resources = []
     for tag in tags:
         bar.next()
-        tag.attrs = _localize_tag(
+        tag.attrs, resource = _localize_tag(
             tag.attrs,
             url,
-            local_res_dir,
-            full_path_res_dir
+            local_res_dir
         )
+        if resource:
+            resources.append(resource)
     bar.finish()
-    return soup.prettify(formatter='html5')
+    return soup.prettify(formatter='html5'), resources
 
 
 def _localize_tag(
     attrs: dict,
     url: dict,
     local_res_dir,
-    full_path_res_dir: str
-) -> dict:
+) -> Tuple[dict, dict]:
     """Localize tag attrs."""
+    resource = {}
     for attr, value in attrs.items():
         if _is_local_resource(attr, value, url['netloc']):
-            res_info = parsed_url.get_for_res(
+            resource = parsed_url.get_for_res(
                 value,
                 url
             )
 
-            res_info['file_name'] = names.get_for_res(
-                url, res_info
-            )
+            resource['file_name'] = names.get_for_res(url, resource)
+            attrs[attr] = os.path.join(local_res_dir, resource['file_name'])
 
-            logger.info(
-                'Request resource - {url}'.format(url=res_info['full_url'])
-            )
-            res_info['data'] = http.get(res_info['full_url'], is_html=False)
-
-            logger.info(
-                'Save resource - {file_name}'.format(
-                    file_name=res_info['file_name']
-                )
-            )
-            _save_resource(
-                res_info,
-                full_path_res_dir,
-            )
-            attrs[attr] = os.path.join(local_res_dir, res_info['file_name'])
-    return attrs
+    return attrs, resource
 
 
 def _save_resource(
