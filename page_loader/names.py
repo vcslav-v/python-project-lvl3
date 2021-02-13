@@ -11,11 +11,11 @@ def get_for_url(url: dict) -> str:
     return _normalize_name(without_scheme_url)
 
 
-def get_for_res(url, res_info):
+def get_for_res(netloc: str, path: str, extention: str):
     return '{name}{extention}'.format(
-                    name=_normalize_name(url['netloc'] + res_info['path']),
-                    extention=res_info['extention']
-            )
+        name=_normalize_name(netloc + path),
+        extention=extention
+    )
 
 
 def _normalize_name(name: str) -> str:

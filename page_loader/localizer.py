@@ -40,7 +40,7 @@ def get_page(
 def _localize_tag(
     attrs: dict,
     url: dict,
-    local_res_dir,
+    local_res_dir: str,
 ) -> Tuple[dict, dict]:
     """Localize tag attrs."""
     resource = {}
@@ -51,41 +51,14 @@ def _localize_tag(
                 url
             )
 
-            resource['file_name'] = names.get_for_res(url, resource)
+            resource['file_name'] = names.get_for_res(
+                url['netloc'],
+                resource['path'],
+                resource['extention']
+            )
             attrs[attr] = os.path.join(local_res_dir, resource['file_name'])
 
     return attrs, resource
-
-
-def _save_resource(
-    res: dict,
-    output_res_dir: str
-):
-    """Save the resource to disk."""
-
-    if not os.path.exists(output_res_dir) or (
-        not os.path.isdir(output_res_dir)
-    ):
-        try:
-            os.mkdir(output_res_dir)
-        except Exception as e:
-            logger.error('{ex}: directory {dir} is not maked'.format(
-                ex=type(e).__name__,
-                dir=output_res_dir
-            ))
-            raise e
-
-    file_path = os.path.join(output_res_dir, res['file_name'])
-
-    try:
-        with open(file_path, 'wb') as res_file:
-            res_file.write(res['data'])
-    except Exception as e:
-        logger.error('{ex}: file {path} is not saved'.format(
-            ex=type(e).__name__,
-            path=file_path
-        ))
-        raise e
 
 
 def _is_local_resource(attr: str, value: str, netloc: str) -> bool:
