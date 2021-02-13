@@ -6,88 +6,95 @@ from progress.bar import Bar
 
 from page_loader.logger import logger
 from page_loader.net import get_response_content
-from page_loader.parser import get_resource_info
+from page_loader import parser
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
 def localize_resources(
-    html_text: str,
     url: dict,
     output_path: str,
 ) -> str:
     """Localize the resources page."""
-    soup = BeautifulSoup(html_text, 'html.parser')
-    logger.debug(html_text)
+    soup = BeautifulSoup(url['data'], 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
     logger.debug(tags)
     bar = Bar('Load resources', max=len(tags))
+    local_res_dir = '{url_name}_files'.format(
+        url_name=parser.get_file_name(url)
+    )
+    full_path_res_dir = os.path.join(output_path, local_res_dir)
     for tag in tags:
         bar.next()
-        tag.attrs = localize_tag(
+        tag.attrs = _localize_tag(
             tag.attrs,
             url,
-            output_path
+            local_res_dir,
+            full_path_res_dir
         )
     bar.finish()
     return soup.prettify(formatter='html5')
 
 
-def localize_tag(
+def _localize_tag(
     attrs: dict,
     url: dict,
-    output_path: str
+    local_res_dir,
+    full_path_res_dir: str
 ) -> dict:
     """Localize tag attrs."""
     for attr, value in attrs.items():
-        if is_local_resource(attr, value, url['netloc']):
-            res_info = get_resource_info(
+        if _is_local_resource(attr, value, url['netloc']):
+            res_info = parser.get_resource_info(
                 value,
                 url
             )
-            logger.info('Request resource - {url}'.format(url=res_info['url']))
+
+            res_info['file_name'] = parser.get_resource_file_name(
+                url, res_info
+            )
+
+            logger.info(
+                'Request resource - {url}'.format(url=res_info['full_url'])
+            )
             res_info['data'] = get_response_content(
-                res_info['url'],
+                res_info['full_url'],
                 is_html=False,
             )
+
             logger.info(
                 'Save resource - {file_name}'.format(
                     file_name=res_info['file_name']
                 )
             )
-            save_resource(
+            _save_resource(
                 res_info,
-                url,
-                output_path,
+                full_path_res_dir,
             )
-            attrs[attr] = res_info['local_path']
+            attrs[attr] = os.path.join(local_res_dir, res_info['file_name'])
     return attrs
 
 
-def save_resource(
+def _save_resource(
     res: dict,
-    url: dict,
-    output_path: str
+    output_res_dir: str
 ):
     """Save the resource to disk."""
-    full_resources_output_path = os.path.join(
-        output_path, url['res_dir_name']
-    )
 
-    if not os.path.exists(full_resources_output_path) or (
-        not os.path.isdir(full_resources_output_path)
+    if not os.path.exists(output_res_dir) or (
+        not os.path.isdir(output_res_dir)
     ):
         try:
-            os.mkdir(full_resources_output_path)
+            os.mkdir(output_res_dir)
         except Exception as e:
             logger.error('{ex}: directory {dir} is not maked'.format(
                 ex=type(e).__name__,
-                dir=full_resources_output_path
+                dir=output_res_dir
             ))
             raise e
 
-    file_path = os.path.join(full_resources_output_path, res['file_name'])
+    file_path = os.path.join(output_res_dir, res['file_name'])
 
     try:
         with open(file_path, 'wb') as res_file:
@@ -100,7 +107,7 @@ def save_resource(
         raise e
 
 
-def is_local_resource(attr: str, value: str, netloc: str) -> bool:
+def _is_local_resource(attr: str, value: str, netloc: str) -> bool:
     if not isinstance(value, str) or attr not in RES_ATTR:
         return False
 

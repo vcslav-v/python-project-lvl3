@@ -38,13 +38,14 @@ def test_dowload_resources(
     expect_data = request.getfixturevalue(expect_data)
     expect_img_files = request.getfixturevalue(expect_img_files)
     expect_soup = BeautifulSoup(expect_data, 'lxml')
+    url['data'] = data
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         resources_output_path = os.path.join(tmp_dir, url['res_dir_name'])
         with requests_mock.Mocker() as mocker:
             for img_url in mock_img_urls:
                 mocker.get(img_url.strip(), text='img')
-            result_html = localize_resources(data, url, tmp_dir)
+            result_html = localize_resources(url, tmp_dir)
 
         assert os.path.exists(resources_output_path) and (
             os.path.isdir(resources_output_path)
@@ -59,4 +60,4 @@ def test_dowload_resources(
 
     expect_html = expect_soup.prettify(formatter='html5')
     result_html = soup.prettify(formatter='html5')
-    assert expect_html == result_html
+    assert result_html == expect_html

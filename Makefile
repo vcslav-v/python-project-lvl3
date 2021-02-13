@@ -57,6 +57,8 @@ install:
 
 test:
 	poetry run pytest tests/
+test-full-diff:
+	poetry run pytest -vv tests/
 package-install:
 	python3 -m pip -q install poetry
 	poetry build -q

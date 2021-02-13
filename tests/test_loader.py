@@ -1,5 +1,5 @@
 from page_loader.loader import download
-from page_loader.parser import get_url_name
+from page_loader.parser import get_file_name
 import os
 import requests_mock
 import tempfile
@@ -28,7 +28,7 @@ from bs4 import BeautifulSoup
     }, 'ru-wikipedia-org-wiki-D0-81'),
 ])
 def test_get_url_name(url, expect):
-    result = get_url_name(url)
+    result = get_file_name(url)
     assert result == expect
 
 

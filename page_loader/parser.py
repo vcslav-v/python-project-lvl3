@@ -33,17 +33,14 @@ def get_url_info(url: str) -> dict:
     url_data['scheme'] = parsed_url.scheme + '://'
     url_data['full_url'] = parsed_url.geturl()
 
-    url_data['file_name'] = get_url_name(url_data)
-    url_data['res_dir_name'] = url_data['file_name'] + '_files'
-
     return url_data
 
 
-def get_url_name(url: dict) -> str:
+def get_file_name(url: dict) -> str:
     """Generate the page name by url."""
     parsed_path, _ = os.path.splitext(url['path'])
     without_scheme_url = url['netloc'] + parsed_path
-    return normalize_name(without_scheme_url)
+    return _normalize_name(without_scheme_url)
 
 
 def get_resource_info(
@@ -82,24 +79,21 @@ def get_resource_info(
     else:
         res_url = value
 
-    file_name = '{name}{extention}'.format(
-        name=normalize_name(url['netloc'] + parsed_path),
-        extention=extention
-    )
-
-    local_path = os.path.join(
-        '{url_name}_files'.format(url_name=url['file_name']),
-        file_name
-    )
-
     return {
-        'url': res_url,
-        'file_name': file_name,
-        'local_path': local_path
+        'full_url': res_url,
+        'path': parsed_path,
+        'extention': extention
     }
 
 
-def normalize_name(name: str) -> str:
+def get_resource_file_name(url, res_info):
+    return '{name}{extention}'.format(
+                    name=_normalize_name(url['netloc'] + res_info['path']),
+                    extention=res_info['extention']
+            )
+
+
+def _normalize_name(name: str) -> str:
     """Make a normalize name from the url.
     Example:
     https://google.com -> google-com
