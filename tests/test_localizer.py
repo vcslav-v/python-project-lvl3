@@ -19,9 +19,9 @@ from bs4 import BeautifulSoup
                 'assets_prefix': 'test-com',
             },
             'res_test_html',
-            'url_res',
+            'res_urls',
             'res_test_expect_html',
-            'file_path_res_expect',
+            'res_file_path_expect',
         ),
     ]
 )

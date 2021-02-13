@@ -37,29 +37,29 @@ def test_get_url_name(url, expect):
         'http://google.com',
         'http://google.com',
         'text/html; charset=UTF-8',
-        'test_html',
-        'test_html'
+        'simple_html',
+        'simple_html'
     ),
     (
         'google.com',
         'http://google.com',
         'text/html',
-        'test_html',
-        'test_html'
+        'simple_html',
+        'simple_html'
     ),
     (
         'https://google.com/index.html',
         'https://google.com/index.html',
         'text/html',
-        'test_html',
-        'test_html',
+        'simple_html',
+        'simple_html',
     ),
     (
         'https://google.com/',
         'https://google.com/',
         'text/css',
-        'test_html',
-        'test_html',
+        'simple_html',
+        'simple_html',
     ),
 ])
 def test_download(url, mock_url, content_type, data, expect_data, request):
@@ -130,12 +130,12 @@ def test_download_dir_not_exist():
     [
         (
             'http://site.com/blog/about',
-            'hexlet_case_html',
-            'hexlet_case_expect_html',
+            'res_test_2_html',
+            'res_test_2_expect_html',
             'site-com-blog-about_files',
             'site-com-blog-about.html',
-            'url_res_hexlet',
-            'file_path_res_hexlet_expect',
+            'res_urls_2',
+            'res_file_path_expect_2',
         ),
     ]
 )
