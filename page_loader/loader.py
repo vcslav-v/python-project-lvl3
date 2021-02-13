@@ -1,6 +1,8 @@
 import os
 from typing import List
 
+from progress.bar import Bar
+
 from page_loader import http, localizer, names, parsed_url
 from page_loader.logger import logger
 
@@ -36,7 +38,7 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
 
     logger.info('Start download resources.')
     for resource in resources:
-        resource['data'] = http.get(resource['full_url'])
+        resource['data'] = http.get(resource['full_url'], is_html=False)
 
     logger.info('Write resource files.')
     _save_resources(resources, output_path, local_res_dir)
@@ -59,11 +61,13 @@ def _save_resources(
                 dir=full_path_res_dir
             ))
             raise e
-
+    bar = Bar('Save resources', max=len(resources))
     for resource in resources:
+        bar.next()
         _save_bytes(resource['data'], os.path.join(
             full_path_res_dir, resource['file_name'])
         )
+    bar.finish()
 
 
 def _save_page(page_data: str, output_path: str, url_info: dict) -> str:

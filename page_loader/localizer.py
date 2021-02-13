@@ -22,7 +22,7 @@ def get_page_and_resources(
     soup = BeautifulSoup(page_data, 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
     logger.debug(tags)
-    bar = Bar('Load resources', max=len(tags))
+    bar = Bar('Parsing resources', max=len(tags))
     resources = []
     for tag in tags:
         bar.next()
