@@ -15,14 +15,7 @@ def get(url: str, is_html=True) -> bytes:
             ex=type(e).__name__, url=url)
         )
         raise e
-
-    if response.status_code != 200:
-        logger.error(
-            ERROR_RESPONSE_STATUS.format(url=url, status=response.status_code)
-        )
-        raise ConnectionError(
-            ERROR_RESPONSE_STATUS.format(url=url, status=response.status_code)
-        )
+    response.raise_for_status()
 
     if is_html:
         content_type = response.headers.get('Content-Type')

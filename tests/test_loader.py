@@ -4,6 +4,7 @@ import requests_mock
 import tempfile
 import pytest
 from bs4 import BeautifulSoup
+from requests import HTTPError
 
 
 @pytest.mark.parametrize(
@@ -81,8 +82,8 @@ def test_download(
             'http://google.com',
             'http://google.com',
             'text/html',
-            301,
-            ConnectionError
+            501,
+            HTTPError
         ),
     ]
 )
