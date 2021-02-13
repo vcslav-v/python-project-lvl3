@@ -1,6 +1,6 @@
 import os
+from typing import List, Tuple
 from urllib.parse import urlparse
-from typing import Tuple, List
 
 from bs4 import BeautifulSoup
 from progress.bar import Bar
@@ -12,7 +12,7 @@ RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
-def get_page(
+def get_page_and_resources(
     url: dict,
     page_data: str,
     local_res_dir: str,

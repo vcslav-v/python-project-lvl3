@@ -4,10 +4,10 @@ import re
 RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
 
 
-def get_for_url(url: dict) -> str:
+def get_for_url(netloc: str, path: str) -> str:
     """Generate the page name by url."""
-    parsed_path, _ = os.path.splitext(url['path'])
-    without_scheme_url = url['netloc'] + parsed_path
+    parsed_path, _ = os.path.splitext(path)
+    without_scheme_url = netloc + parsed_path
     return _normalize_name(without_scheme_url)
 
 

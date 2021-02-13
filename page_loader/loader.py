@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from page_loader import http, localizer, names, parsed_url
 from page_loader.logger import logger
@@ -19,18 +20,34 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     logger.info('Request to {url}'.format(url=url_info['full_url']))
     page_data = http.get(url_info['full_url']).decode()
 
+    logger.info('Get resources from page.')
     local_res_dir = '{url_name}_files'.format(
-        url_name=names.get_for_url(url_info)
+        url_name=names.get_for_url(url_info['netloc'], url_info['path'])
     )
-    full_path_res_dir = os.path.join(output_path, local_res_dir)
-    logger.info('Start download resources.')
-    page_data, resources = localizer.get_page(
+    page_data, resources = localizer.get_page_and_resources(
         url_info,
         page_data,
         local_res_dir,
         output_path
     )
 
+    logger.info('Write html page file.')
+    output_page_file_path = _save_page(page_data, output_path, url_info)
+
+    logger.info('Start download resources.')
+    for resource in resources:
+        resource['data'] = http.get(resource['full_url'])
+
+    logger.info('Write resource files.')
+    _save_resources(resources, output_path, local_res_dir)
+
+    return output_page_file_path
+
+
+def _save_resources(
+    resources: List[dict], output_path: str, local_res_dir: str
+):
+    full_path_res_dir = os.path.join(output_path, local_res_dir)
     if not os.path.exists(full_path_res_dir) or (
         not os.path.isdir(full_path_res_dir)
     ):
@@ -44,23 +61,24 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
             raise e
 
     for resource in resources:
-        data = http.get(resource['full_url'])
-        _save(data, os.path.join(
+        _save_bytes(resource['data'], os.path.join(
             full_path_res_dir, resource['file_name'])
         )
 
+
+def _save_page(page_data: str, output_path: str, url_info: dict) -> str:
     output_page_file_path = os.path.join(
         output_path,
         '{url_name}.html'.format(
-            url_name=names.get_for_url(url_info)
+            url_name=names.get_for_url(url_info['netloc'], url_info['path'])
         ),
     )
-    logger.info('Write html page file.')
-    output_file_path = _save(page_data.encode('UTF-8'), output_page_file_path)
-    return output_file_path
+    _save_bytes(page_data.encode('UTF-8'), output_page_file_path)
+
+    return output_page_file_path
 
 
-def _save(
+def _save_bytes(
     data: bytes,
     output_path: str
 ) -> str:

@@ -40,7 +40,7 @@ def get_for_res(
     url: dict
 ) -> dict:
     """Generate the resource info.
-    {'url', 'file_name', 'local_path'}
+    {'full_url', 'path', 'extention'}
     """
     parsed_value_url = urlparse(value)
 
