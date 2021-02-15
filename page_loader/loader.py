@@ -35,7 +35,7 @@ LOGGING_CONFIG = {
         },
     },
     'loggers': {
-        'root': {
+        __name__: {
             'handlers': ['file_handler', 'error_handler'],
             'level': 'DEBUG',
         }
@@ -43,7 +43,7 @@ LOGGING_CONFIG = {
 }
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger('root')
+logger = logging.getLogger(__name__)
 
 
 def download(url: str, output_path: str = os.getcwd()) -> str:
@@ -59,7 +59,7 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     url_info = parsed_url.get(url)
 
     logger.info('Request to {url}'.format(url=url_info['full_url']))
-    page_data = http.get(url_info['full_url'], logger).decode()
+    page_data = http.get(url_info['full_url']).decode()
 
     logger.info('Get resources from page.')
     local_res_dir = '{url_name}_files'.format(
@@ -78,7 +78,7 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     logger.info('Start download resources.')
     for resource in resources:
         resource['data'] = http.get(
-            resource['full_url'], logger, is_html=False
+            resource['full_url'], is_html=False
         )
 
     logger.info('Write resource files.')
