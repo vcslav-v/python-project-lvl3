@@ -6,6 +6,8 @@ from page_loader import errors
 
 logger = logging.getLogger(__name__)
 
+CHUNK_SIZE = 256
+
 
 def get_page(url: str) -> requests.Response:
     """Load the content."""
@@ -35,7 +37,7 @@ def get_resource_chunks(url: str) -> Generator:
 
     def chunks() -> Generator:
         try:
-            for chunk in response.iter_content(chunk_size=256):
+            for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                 yield chunk
         except requests.RequestException as exc:
             logger.error(
