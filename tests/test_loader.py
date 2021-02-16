@@ -4,8 +4,6 @@ import requests_mock
 import tempfile
 import pytest
 from bs4 import BeautifulSoup
-from requests import HTTPError
-
 
 @pytest.mark.parametrize(
     'url, mock_url, html_file_expect, content_type, data, expect_data', [
