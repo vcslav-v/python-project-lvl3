@@ -19,7 +19,7 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     url = _add_scheme(url)
 
     logger.info('Request to {url}'.format(url=url))
-    response = http.get(url)
+    response = http.get_page(url)
 
     logger.info('Get resources from page.')
     local_page, resources = localizer.get_page_and_resources(response)
@@ -28,12 +28,12 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     output_page_file_path = _save_page(local_page, response.url, output_path)
 
     logger.info('Start download resources.')
-    _download_resources(resources, response.url, output_path)
+    _download_and_save_resources(resources, response.url, output_path)
 
     return output_page_file_path
 
 
-def _download_resources(
+def _download_and_save_resources(
     resource_urls: List[str],
     page_url: str,
     output_path: str
@@ -53,10 +53,23 @@ def _download_resources(
         )) from exc
 
     for res_url in resource_urls:
-        data = http.get(res_url, is_html=False)
+        data_chunks = http.get_resource_chunks(res_url)
         file_name = name.get_for_res_file(page_url, res_url)
         res_file_path = os.path.join(full_path_res_dir, file_name)
-        _save_bytes(data.content, res_file_path)
+        try:
+            with open(res_file_path, 'wb') as output_file:
+                for data_chunk in data_chunks:
+                    output_file.write(data_chunk)
+        except OSError as exc:
+            logger.error('{exc}: {path}'.format(
+                exc=type(exc).__name__,
+                path=output_path
+            ))
+            raise errors.SaveError(
+                'File {path} cant be save.'.format(path=output_path)
+            ) from exc
+        except errors.NetError as exc:
+            raise exc
 
 
 def _save_page(page_data: str, page_url: str, output_path: str) -> str:
@@ -64,19 +77,9 @@ def _save_page(page_data: str, page_url: str, output_path: str) -> str:
         output_path,
         name.get_for_page_file(page_url)
     )
-    _save_bytes(page_data.encode('UTF-8'), output_page_file_path)
-
-    return output_page_file_path
-
-
-def _save_bytes(
-    data: bytes,
-    output_path: str
-) -> str:
-    """Save the html page to disk."""
     try:
-        with open(output_path, 'wb') as output_file:
-            output_file.write(data)
+        with open(output_page_file_path, 'wb') as output_file:
+            output_file.write(page_data.encode('UTF-8'))
     except OSError as exc:
         logger.error('{exc}: {path}'.format(
             exc=type(exc).__name__,
@@ -85,7 +88,8 @@ def _save_bytes(
         raise errors.SaveError(
             'File {path} cant be save.'.format(path=output_path)
         ) from exc
-    return output_path
+
+    return output_page_file_path
 
 
 def _add_scheme(url: str) -> str:
