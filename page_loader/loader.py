@@ -3,8 +3,6 @@ import logging.config
 import os
 from typing import List
 
-from progress.bar import Bar
-
 from page_loader import http, localizer, names, parsed_url
 
 LOGGING_CONFIG = {
@@ -55,68 +53,51 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
         url=url,
         out_path=output_path
     ))
+    url = parsed_url.add_scheme(url)
 
-    url_info = parsed_url.get(url)
-
-    logger.info('Request to {url}'.format(url=url_info['full_url']))
-    page_data = http.get(url_info['full_url']).decode()
+    logger.info('Request to {url}'.format(url=url))
+    response = http.get(url)
 
     logger.info('Get resources from page.')
-    local_res_dir = '{url_name}_files'.format(
-        url_name=names.get_for_url(url_info['netloc'], url_info['path'])
-    )
-    page_data, resources = localizer.get_page_and_resources(
-        url_info,
-        page_data,
-        local_res_dir,
-        output_path
-    )
+    local_page, resources = localizer.get_page_and_resources(response)
 
     logger.info('Write html page file.')
-    output_page_file_path = _save_page(page_data, output_path, url_info)
+    output_page_file_path = _save_page(local_page, response.url, output_path)
 
     logger.info('Start download resources.')
-    for resource in resources:
-        resource['data'] = http.get(
-            resource['full_url'], is_html=False
-        )
-
-    logger.info('Write resource files.')
-    _save_resources(resources, output_path, local_res_dir)
+    _download_resources(resources, response.url, output_path)
 
     return output_page_file_path
 
 
-def _save_resources(
-    resources: List[dict], output_path: str, local_res_dir: str
+def _download_resources(
+    resource_urls: List[str],
+    page_url: str,
+    output_path: str
 ):
+    local_res_dir = names.get_local_res_dir(page_url)
     full_path_res_dir = os.path.join(output_path, local_res_dir)
-    if not os.path.exists(full_path_res_dir) or (
-        not os.path.isdir(full_path_res_dir)
-    ):
-        try:
-            os.mkdir(full_path_res_dir)
-        except Exception as e:
-            logger.error('{ex}: directory {dir} is not maked'.format(
-                ex=type(e).__name__,
-                dir=full_path_res_dir
-            ))
-            raise e
-    bar = Bar('Save resources', max=len(resources))
-    for resource in resources:
-        bar.next()
-        _save_bytes(resource['data'], os.path.join(
-            full_path_res_dir, resource['file_name'])
+
+    try:
+        os.mkdir(full_path_res_dir)
+    except OSError:
+        err_msg = 'OSError: directory {dir} is not maked'.format(
+            dir=full_path_res_dir
         )
-    bar.finish()
+        logger.error(err_msg)
+        raise OSError(err_msg)
+
+    for res_url in resource_urls:
+        data = http.get(res_url, is_html=False)
+        file_name = names.get_for_res(page_url, res_url)
+        res_file_path = os.path.join(full_path_res_dir, file_name)
+        _save_bytes(data.content, res_file_path)
 
 
-def _save_page(page_data: str, output_path: str, url_info: dict) -> str:
+def _save_page(page_data: str, page_url: str, output_path: str) -> str:
     output_page_file_path = os.path.join(
         output_path,
-        '{url_name}.html'.format(
-            url_name=names.get_for_url(url_info['netloc'], url_info['path'])
-        ),
+        names.get_for_page(page_url)
     )
     _save_bytes(page_data.encode('UTF-8'), output_page_file_path)
 
