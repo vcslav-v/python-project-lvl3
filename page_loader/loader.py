@@ -40,6 +40,7 @@ def _download_and_save_resources(
     page_url: str,
     output_path: str
 ):
+    """Download and save resources."""
     local_res_dir = name.get_local_res_dir(page_url)
     full_path_res_dir = os.path.join(output_path, local_res_dir)
 
@@ -78,6 +79,7 @@ def _download_and_save_resources(
 
 
 def _save_page(page_data: str, page_url: str, output_path: str) -> str:
+    """Save the html page."""
     output_page_file_path = os.path.join(
         output_path,
         name.get_for_page_file(page_url)
@@ -98,6 +100,7 @@ def _save_page(page_data: str, page_url: str, output_path: str) -> str:
 
 
 def _add_scheme(url: str) -> str:
+    """Add a schema if it doesn't exist."""
     if '://' in url:
         return url
     return 'http://' + url

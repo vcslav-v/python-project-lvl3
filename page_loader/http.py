@@ -28,6 +28,7 @@ def get_page(url: str) -> requests.Response:
 
 
 def get_resource_chunks(url: str) -> Generator:
+    """Download a resource via an iterator with chunk."""
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()

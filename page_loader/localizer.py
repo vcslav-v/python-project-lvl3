@@ -38,7 +38,7 @@ def _localize_tag(
     page_url: str,
     local_res_dir: str,
 ) -> Tuple[dict, str]:
-    """Localize tag attrs."""
+    """Find and make a local tag with a resource."""
     src_key_set = attrs.keys() & RES_ATTR
     if not src_key_set:
         return {}, ''
