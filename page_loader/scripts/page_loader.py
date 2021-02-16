@@ -2,13 +2,52 @@
 """Page-loader script."""
 
 import argparse
-from typing import Tuple
-from page_loader import download
+import logging.config
 import os
 import sys
+from typing import Tuple
+
+from page_loader import download, errors
 
 DESCRIPTION = 'Dowload page'
 HELP_STRING = 'Path to download'
+
+LOGGING_CONFIG = {
+    'version': 1,
+    'formatters': {
+        'standart': {
+            'format': '%(asctime)s - %(levelname)s: %(message)s'
+        },
+        'error': {
+            'format': '%(levelname)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'file_handler': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'filename': 'page_loader.log',
+            'mode': 'a',
+            'maxBytes': 10240,
+            'backupCount': 0,
+            'formatter': 'standart',
+        },
+        'error_handler': {
+            'class': 'logging.StreamHandler',
+            'level': 'ERROR',
+            'stream': 'ext://sys.stderr',
+            'formatter': 'error',
+        },
+    },
+    'loggers': {
+        __name__: {
+            'handlers': ['file_handler', 'error_handler'],
+            'level': 'DEBUG',
+        }
+    },
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
 
 
 def main():
@@ -17,7 +56,7 @@ def main():
     exit_status = 0
     try:
         print(download(url, output_path))
-    except Exception:
+    except errors.AppInternalError:
         exit_status = 1
     sys.exit(exit_status)
 

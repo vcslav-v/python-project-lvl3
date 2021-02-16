@@ -1,10 +1,9 @@
-from page_loader.loader import download
+from page_loader.loader import download, errors
 import os
 import requests_mock
 import tempfile
 import pytest
 from bs4 import BeautifulSoup
-from requests import HTTPError
 
 
 @pytest.mark.parametrize(
@@ -83,7 +82,7 @@ def test_download(
             'http://google.com',
             'text/html',
             501,
-            HTTPError
+            errors.NetError
         ),
     ]
 )
@@ -107,7 +106,7 @@ def test_download_request_errors(
 def test_download_dir_not_exist():
     URL = 'test.com'
     with tempfile.TemporaryDirectory() as tmp_dir:
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(errors.SaveError):
             download(URL, os.path.join(tmp_dir, 'temp'))
 
 

@@ -1,35 +1,33 @@
 import os
+from requests import Response
 from typing import List, Tuple
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 from bs4 import BeautifulSoup
 from progress.bar import Bar
 
-from page_loader import names, parsed_url
+from page_loader import name
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
-def get_page_and_resources(
-    url: dict,
-    page_data: str,
-    local_res_dir: str,
-    output_path: str,
-) -> Tuple[str, List[dict]]:
+def get_page_and_resources(response: Response) -> Tuple[str, List[str]]:
     """Localize the resources page."""
-    soup = BeautifulSoup(page_data, 'html.parser')
+    soup = BeautifulSoup(response.content.decode(), 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
-    bar = Bar('Parsing resources', max=len(tags))
+    local_res_dir = name.get_local_res_dir(response.url)
     resources = []
+    bar = Bar('Parsing resources', max=len(tags))
     for tag in tags:
         bar.next()
-        tag.attrs, resource = _localize_tag(
+        local_attr, resource = _localize_tag(
             tag.attrs,
-            url,
+            response.url,
             local_res_dir
         )
         if resource:
+            tag.attrs.update(local_attr)
             resources.append(resource)
     bar.finish()
     return soup.prettify(formatter='html5'), resources
@@ -37,33 +35,27 @@ def get_page_and_resources(
 
 def _localize_tag(
     attrs: dict,
-    url: dict,
+    page_url: str,
     local_res_dir: str,
-) -> Tuple[dict, dict]:
+) -> Tuple[dict, str]:
     """Localize tag attrs."""
-    resource = {}
-    for attr, value in attrs.items():
-        if _is_local_resource(attr, value, url['netloc']):
-            resource = parsed_url.get_for_res(
-                value,
-                url
-            )
+    src_key_set = attrs.keys() & RES_ATTR
+    if not src_key_set:
+        return {}, ''
 
-            resource['file_name'] = names.get_for_res(
-                url['netloc'],
-                resource['path'],
-                resource['extention']
-            )
-            attrs[attr] = os.path.join(local_res_dir, resource['file_name'])
+    src_key: str = src_key_set.pop()
+    if not _is_local_resource(attrs[src_key], page_url):
+        return {}, ''
 
-    return attrs, resource
+    resource_url = urljoin(page_url, attrs[src_key])
+    file_name = name.get_for_res_file(page_url, resource_url)
+    return {src_key: os.path.join(local_res_dir, file_name)}, resource_url
 
 
-def _is_local_resource(attr: str, value: str, netloc: str) -> bool:
-    if not isinstance(value, str) or attr not in RES_ATTR:
+def _is_local_resource(value: str, page_url: str) -> bool:
+    if not isinstance(value, str):
         return False
 
-    parsed_value_url = urlparse(value)
-    if parsed_value_url.netloc and netloc != parsed_value_url.netloc:
-        return False
-    return True
+    value_netloc = urlparse(value).netloc
+    page_netloc = urlparse(page_url).netloc
+    return not value_netloc or value_netloc == page_netloc
