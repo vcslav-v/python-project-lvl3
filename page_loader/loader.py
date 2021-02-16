@@ -54,7 +54,7 @@ def _download_and_save_resources(
             dir=full_path_res_dir
         )) from exc
 
-    bar = Bar('Parsing resources', max=len(resource_urls))
+    bar = Bar('Download resources', max=len(resource_urls))
     for res_url in resource_urls:
         data_chunks = http.get_resource_chunks(res_url)
         file_name = name.get_for_res_file(page_url, res_url)
