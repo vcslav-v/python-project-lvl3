@@ -21,12 +21,13 @@ def get_page_and_resources(response: Response) -> Tuple[str, List[str]]:
     bar = Bar('Parsing resources', max=len(tags))
     for tag in tags:
         bar.next()
-        tag.attrs, resource = _localize_tag(
+        local_attr, resource = _localize_tag(
             tag.attrs,
             response.url,
             local_res_dir
         )
         if resource:
+            tag.attrs.update(local_attr)
             resources.append(resource)
     bar.finish()
     return soup.prettify(formatter='html5'), resources
@@ -34,23 +35,25 @@ def get_page_and_resources(response: Response) -> Tuple[str, List[str]]:
 
 def _localize_tag(
     attrs: dict,
-    url: str,
+    page_url: str,
     local_res_dir: str,
 ) -> Tuple[dict, str]:
     """Localize tag attrs."""
-    resource = ''
-    for attr, value in attrs.items():
-        if not _is_local_resource(attr, value, url):
-            continue
-        resource = urljoin(url, value)
-        file_name = name.get_for_res_file(url, resource)
-        attrs[attr] = os.path.join(local_res_dir, file_name)
-        return attrs, resource
-    return attrs, resource
+    src_key_set = attrs.keys() & RES_ATTR
+    if not src_key_set:
+        return {}, ''
+
+    src_key: str = src_key_set.pop()
+    if not _is_local_resource(attrs[src_key], page_url):
+        return {}, ''
+
+    resource_url = urljoin(page_url, attrs[src_key])
+    file_name = name.get_for_res_file(page_url, resource_url)
+    return {src_key: os.path.join(local_res_dir, file_name)}, resource_url
 
 
-def _is_local_resource(attr: str, value: str, page_url: str) -> bool:
-    if not isinstance(value, str) or attr not in RES_ATTR:
+def _is_local_resource(value: str, page_url: str) -> bool:
+    if not isinstance(value, str):
         return False
 
     value_netloc = urlparse(value).netloc
