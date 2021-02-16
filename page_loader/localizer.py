@@ -40,10 +40,11 @@ def _localize_tag(
     """Localize tag attrs."""
     resource = ''
     for attr, value in attrs.items():
-        if _is_local_resource(attr, value, url):
-            resource = urljoin(url, value)
-            file_name = name.get_for_res_file(url, resource)
-            attrs[attr] = os.path.join(local_res_dir, file_name)
+        if not _is_local_resource(attr, value, url):
+            continue
+        resource = urljoin(url, value)
+        file_name = name.get_for_res_file(url, resource)
+        attrs[attr] = os.path.join(local_res_dir, file_name)
     return attrs, resource
 
 
@@ -53,6 +54,4 @@ def _is_local_resource(attr: str, value: str, page_url: str) -> bool:
 
     value_netloc = urlparse(value).netloc
     page_netloc = urlparse(page_url).netloc
-    if value_netloc and value_netloc != page_netloc:
-        return False
-    return True
+    return not value_netloc or value_netloc == page_netloc

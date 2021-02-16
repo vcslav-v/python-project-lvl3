@@ -3,7 +3,7 @@ import logging.config
 import os
 from typing import List
 
-from page_loader import http, localizer, name
+from page_loader import http, localizer, name, errors
 
 LOGGING_CONFIG = {
     'version': 1,
@@ -80,12 +80,14 @@ def _download_resources(
 
     try:
         os.mkdir(full_path_res_dir)
-    except OSError:
-        err_msg = 'OSError: directory {dir} is not maked'.format(
+    except errors.SaveError as exc:
+        logger.error('{exc}: directory {dir} is not maked'.format(
+            exc=type(exc).__name__,
             dir=full_path_res_dir
-        )
-        logger.error(err_msg)
-        raise OSError(err_msg)
+        ))
+        raise errors.SaveError('Directory {dir} cant be maked'.format(
+            dir=full_path_res_dir
+        )) from exc
 
     for res_url in resource_urls:
         data = http.get(res_url, is_html=False)
@@ -112,16 +114,18 @@ def _save_bytes(
     try:
         with open(output_path, 'wb') as output_file:
             output_file.write(data)
-    except Exception as e:
-        logger.error('{ex}: {path}'.format(
-            ex=type(e).__name__,
+    except OSError as exc:
+        logger.error('{exc}: {path}'.format(
+            exc=type(exc).__name__,
             path=output_path
         ))
-        raise e
+        raise errors.SaveError(
+            'File {path} cant be save.'.format(path=output_path)
+        ) from exc
     return output_path
 
 
 def _add_scheme(url: str) -> str:
-    if '://' not in url:
-        return 'http://' + url
-    return url
+    if '://' in url:
+        return url
+    return 'http://' + url

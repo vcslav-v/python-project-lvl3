@@ -3,7 +3,7 @@
 
 import argparse
 from typing import Tuple
-from page_loader import download
+from page_loader import download, errors
 import os
 import sys
 
@@ -17,7 +17,7 @@ def main():
     exit_status = 0
     try:
         print(download(url, output_path))
-    except Exception:
+    except errors.AppInternalError:
         exit_status = 1
     sys.exit(exit_status)
 
