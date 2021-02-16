@@ -80,7 +80,7 @@ def _download_resources(
 
     try:
         os.mkdir(full_path_res_dir)
-    except errors.SaveError as exc:
+    except OSError as exc:
         logger.error('{exc}: directory {dir} is not maked'.format(
             exc=type(exc).__name__,
             dir=full_path_res_dir
