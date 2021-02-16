@@ -2,7 +2,9 @@ import logging
 import os
 from typing import List
 
-from page_loader import http, localizer, name, errors
+from progress.bar import Bar
+
+from page_loader import errors, http, localizer, name
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,7 @@ def _download_and_save_resources(
             dir=full_path_res_dir
         )) from exc
 
+    bar = Bar('Parsing resources', max=len(resource_urls))
     for res_url in resource_urls:
         data_chunks = http.get_resource_chunks(res_url)
         file_name = name.get_for_res_file(page_url, res_url)
@@ -70,6 +73,8 @@ def _download_and_save_resources(
             ) from exc
         except errors.NetError as exc:
             raise exc
+        bar.next()
+    bar.finish()
 
 
 def _save_page(page_data: str, page_url: str, output_path: str) -> str:
