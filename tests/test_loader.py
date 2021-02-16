@@ -5,6 +5,7 @@ import tempfile
 import pytest
 from bs4 import BeautifulSoup
 
+
 @pytest.mark.parametrize(
     'url, mock_url, html_file_expect, content_type, data, expect_data', [
         (
