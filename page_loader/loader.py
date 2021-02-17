@@ -24,14 +24,18 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     logger.info('Request to {url}'.format(url=url))
     response = http.get_page(url)
 
+    local_res_dir = name.get_local_res_dir(url)
+
     logger.info('Get resources from page.')
-    local_page, resources = localizer.get_page_and_resources(response, url)
+    local_page, resources = localizer.get_page_and_resources(
+        response, url, local_res_dir
+    )
 
     logger.info('Write html page file.')
     output_page_file_path = _save_page(local_page, url, output_path)
 
     logger.info('Start download resources.')
-    _download_and_save_resources(resources, url, output_path)
+    _download_and_save_resources(resources, url, output_path, local_res_dir)
 
     return output_page_file_path
 
@@ -39,10 +43,10 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
 def _download_and_save_resources(
     resource_urls: List[str],
     page_url: str,
-    output_path: str
+    output_path: str,
+    local_res_dir: str,
 ):
     """Download and save resources."""
-    local_res_dir = name.get_local_res_dir(page_url)
     full_path_res_dir = os.path.join(output_path, local_res_dir)
 
     try:

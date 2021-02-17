@@ -12,12 +12,11 @@ RES_ATTR = {'src', 'href'}
 
 
 def get_page_and_resources(
-    response: bytes, page_url: str
+    response: bytes, page_url: str, local_res_dir: str
 ) -> Tuple[str, List[str]]:
     """Localize the resources page."""
     soup = BeautifulSoup(response.decode(), 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
-    local_res_dir = name.get_local_res_dir(page_url)
     resources = []
     bar = Bar('Parsing resources', max=len(tags))
     for tag in tags:
