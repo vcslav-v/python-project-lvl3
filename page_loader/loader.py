@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import List
+from urllib.parse import urlparse
 
 from progress.bar import Bar
 
@@ -99,6 +100,7 @@ def _save_page(page_data: str, page_url: str, output_path: str) -> str:
 
 def _add_scheme(url: str) -> str:
     """Add a schema if it doesn't exist."""
-    if '://' in url:
-        return url
-    return 'http://' + url
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme:
+        return 'http://' + url
+    return url
