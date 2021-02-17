@@ -72,8 +72,6 @@ def _download_and_save_resources(
             raise errors.SaveError(
                 'File {path} cant be save.'.format(path=output_path)
             ) from exc
-        except errors.NetError as exc:
-            raise exc
         bar.next()
     bar.finish()
 
