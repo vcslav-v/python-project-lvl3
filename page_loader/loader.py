@@ -25,13 +25,13 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
     response = http.get_page(url)
 
     logger.info('Get resources from page.')
-    local_page, resources = localizer.get_page_and_resources(response)
+    local_page, resources = localizer.get_page_and_resources(response, url)
 
     logger.info('Write html page file.')
-    output_page_file_path = _save_page(local_page, response.url, output_path)
+    output_page_file_path = _save_page(local_page, url, output_path)
 
     logger.info('Start download resources.')
-    _download_and_save_resources(resources, response.url, output_path)
+    _download_and_save_resources(resources, url, output_path)
 
     return output_page_file_path
 

@@ -1,5 +1,4 @@
 import os
-from requests import Response
 from typing import List, Tuple
 from urllib.parse import urlparse, urljoin
 
@@ -12,18 +11,20 @@ RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
-def get_page_and_resources(response: Response) -> Tuple[str, List[str]]:
+def get_page_and_resources(
+    response: bytes, page_url: str
+) -> Tuple[str, List[str]]:
     """Localize the resources page."""
-    soup = BeautifulSoup(response.content.decode(), 'html.parser')
+    soup = BeautifulSoup(response.decode(), 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
-    local_res_dir = name.get_local_res_dir(response.url)
+    local_res_dir = name.get_local_res_dir(page_url)
     resources = []
     bar = Bar('Parsing resources', max=len(tags))
     for tag in tags:
         bar.next()
         local_attr, resource = _localize_tag(
             tag.attrs,
-            response.url,
+            page_url,
             local_res_dir
         )
         if resource:
