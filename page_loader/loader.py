@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List
 from urllib.parse import urlparse
+import pathlib
 
 from progress.bar import Bar
 
@@ -50,7 +51,7 @@ def _download_and_save_resources(
     full_path_res_dir = os.path.join(output_path, local_res_dir)
 
     try:
-        os.mkdir(full_path_res_dir)
+        pathlib.Path(full_path_res_dir).mkdir()
     except OSError as exc:
         logger.error('{exc}: directory {dir} is not maked'.format(
             exc=type(exc).__name__,
