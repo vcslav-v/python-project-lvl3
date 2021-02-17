@@ -88,8 +88,8 @@ def _save_page(page_data: str, page_url: str, output_path: str) -> str:
         name.get_for_page_file(page_url)
     )
     try:
-        with open(output_page_file_path, 'wb') as output_file:
-            output_file.write(page_data.encode('UTF-8'))
+        with open(output_page_file_path, 'w') as output_file:
+            output_file.write(page_data)
     except OSError as exc:
         logger.error('{exc}: {path}'.format(
             exc=type(exc).__name__,
