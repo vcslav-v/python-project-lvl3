@@ -24,7 +24,7 @@ def get_page(url: str) -> bytes:
             'In response is not html text. URL is {url}'.format(url=url)
         )
 
-    return response.content
+    return response.text
 
 
 def get_resource_chunks(url: str) -> Generator:

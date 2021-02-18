@@ -53,7 +53,7 @@ def _download_and_save_resources(
     full_path_res_dir = os.path.join(output_path, local_res_dir)
 
     try:
-        pathlib.Path(full_path_res_dir).mkdir()
+        pathlib.Path(full_path_res_dir).mkdir(parents=True, exist_ok=True)
     except OSError as exc:
         logger.error('{exc}: directory {dir} is not maked'.format(
             exc=type(exc).__name__,
