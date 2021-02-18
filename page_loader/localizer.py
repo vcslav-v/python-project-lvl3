@@ -5,13 +5,13 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from progress.bar import Bar
 
-from page_loader import name
+from page_loader import url
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
-def get_page_and_resources(
+def make_local_html(
     response: bytes, page_url: str, local_res_dir: str
 ) -> Tuple[str, List[str]]:
     """Localize the resources page."""
@@ -48,7 +48,7 @@ def _localize_tag(
         return attrs, ''
 
     resource_url = urljoin(page_url, attrs[src_key])
-    file_name = name.get_for_res_file(page_url, resource_url)
+    file_name = url.to_res_filename(page_url, resource_url)
     local_attrs[src_key] = os.path.join(local_res_dir, file_name)
     return local_attrs, resource_url
 

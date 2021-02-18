@@ -6,12 +6,12 @@ import pathlib
 
 from progress.bar import Bar
 
-from page_loader import errors, http, localizer, name
+from page_loader import errors, http, localizer, url
 
 logger = logging.getLogger(__name__)
 
 
-def download(url: str, output_path: str = os.getcwd()) -> str:
+def download(page_url: str, output_path: str = os.getcwd()) -> str:
     """Download the page from the url and save it to the output address.
     Return:
         Full path to file.
@@ -20,23 +20,25 @@ def download(url: str, output_path: str = os.getcwd()) -> str:
         url=url,
         out_path=output_path
     ))
-    url = _add_scheme(url)
+    page_url = _add_scheme_if_missing(page_url)
 
     logger.info('Request to {url}'.format(url=url))
-    response = http.get_page(url)
+    response = http.get_page(page_url)
 
-    local_res_dir = name.get_local_res_dir(url)
+    local_res_dir = url.to_res_dir_name(page_url)
 
     logger.info('Get resources from page.')
-    local_page, resources = localizer.get_page_and_resources(
-        response, url, local_res_dir
+    local_page, resource_urls = localizer.make_local_html(
+        response, page_url, local_res_dir
     )
 
     logger.info('Write html page file.')
-    output_page_file_path = _save_page(local_page, url, output_path)
+    output_page_file_path = _save_page(local_page, page_url, output_path)
 
     logger.info('Start download resources.')
-    _download_and_save_resources(resources, url, output_path, local_res_dir)
+    _download_and_save_resources(
+        resource_urls, page_url, output_path, local_res_dir
+    )
 
     return output_page_file_path
 
@@ -64,7 +66,7 @@ def _download_and_save_resources(
     bar = Bar('Download resources', max=len(resource_urls))
     for res_url in resource_urls:
         data_chunks = http.get_resource_chunks(res_url)
-        file_name = name.get_for_res_file(page_url, res_url)
+        file_name = url.to_res_filename(page_url, res_url)
         res_file_path = os.path.join(full_path_res_dir, file_name)
         try:
             with open(res_file_path, 'wb') as output_file:
@@ -82,15 +84,15 @@ def _download_and_save_resources(
     bar.finish()
 
 
-def _save_page(page_data: str, page_url: str, output_path: str) -> str:
+def _save_page(page_html: str, page_url: str, output_path: str) -> str:
     """Save the html page."""
     output_page_file_path = os.path.join(
         output_path,
-        name.get_for_page_file(page_url)
+        url.to_page_filename(page_url)
     )
     try:
         with open(output_page_file_path, 'w') as output_file:
-            output_file.write(page_data)
+            output_file.write(page_html)
     except OSError as exc:
         logger.error('{exc}: {path}'.format(
             exc=type(exc).__name__,
@@ -103,7 +105,7 @@ def _save_page(page_data: str, page_url: str, output_path: str) -> str:
     return output_page_file_path
 
 
-def _add_scheme(url: str) -> str:
+def _add_scheme_if_missing(url: str) -> str:
     """Add a schema if it doesn't exist."""
     parsed_url = urlparse(url)
     if not parsed_url.scheme:
