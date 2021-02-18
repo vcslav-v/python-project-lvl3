@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 RE_NOT_NUMS_OR_LETTERS = r'[^a-z0-9]+'
 
 
-def get_for_page_file(url: str) -> str:
+def to_page_filename(url: str) -> str:
     """Generate the page file name by url."""
     parsed_url = urlparse(url.rstrip('/'))
     without_extention_path, extention = os.path.splitext(parsed_url.path)
@@ -15,7 +15,7 @@ def get_for_page_file(url: str) -> str:
     return _normalize_name(without_scheme_url) + extention
 
 
-def get_for_res_file(page_url: str, res_url: str):
+def to_res_filename(page_url: str, res_url: str):
     """Generate the resource file name by url."""
     page_netloc = urlparse(page_url).netloc
     res_path = urlparse(res_url).path
@@ -28,7 +28,7 @@ def get_for_res_file(page_url: str, res_url: str):
     )
 
 
-def get_local_res_dir(url: str):
+def to_res_dir_name(url: str):
     """Generate the resource dir name by url."""
     parsed_url = urlparse(url)
     without_extention_path, _ = os.path.splitext(parsed_url.path)

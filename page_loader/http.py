@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 CHUNK_SIZE = 256
 
 
-def get_page(url: str) -> requests.Response:
+def get_page(url: str) -> bytes:
     """Load the content."""
     try:
         response = requests.get(url)
@@ -24,7 +24,7 @@ def get_page(url: str) -> requests.Response:
             'In response is not html text. URL is {url}'.format(url=url)
         )
 
-    return response
+    return response.content
 
 
 def get_resource_chunks(url: str) -> Generator:

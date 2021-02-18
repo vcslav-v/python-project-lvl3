@@ -1,33 +1,32 @@
 import os
-from requests import Response
 from typing import List, Tuple
 from urllib.parse import urlparse, urljoin
 
 from bs4 import BeautifulSoup
 from progress.bar import Bar
 
-from page_loader import name
+from page_loader import url
 
 RESOURCES_TAGS = {'img', 'link', 'script'}
 RES_ATTR = {'src', 'href'}
 
 
-def get_page_and_resources(response: Response) -> Tuple[str, List[str]]:
+def make_local_html(
+    response: bytes, page_url: str, local_res_dir: str
+) -> Tuple[str, List[str]]:
     """Localize the resources page."""
-    soup = BeautifulSoup(response.content.decode(), 'html.parser')
+    soup = BeautifulSoup(response.decode(), 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
-    local_res_dir = name.get_local_res_dir(response.url)
     resources = []
     bar = Bar('Parsing resources', max=len(tags))
     for tag in tags:
         bar.next()
-        local_attr, resource = _localize_tag(
+        tag.attrs, resource = _localize_tag(
             tag.attrs,
-            response.url,
+            page_url,
             local_res_dir
         )
         if resource:
-            tag.attrs.update(local_attr)
             resources.append(resource)
     bar.finish()
     return soup.prettify(formatter='html5'), resources
@@ -39,17 +38,19 @@ def _localize_tag(
     local_res_dir: str,
 ) -> Tuple[dict, str]:
     """Find and make a local tag with a resource."""
-    src_key_set = attrs.keys() & RES_ATTR
+    local_attrs = attrs.copy()
+    src_key_set = local_attrs.keys() & RES_ATTR
     if not src_key_set:
-        return {}, ''
+        return attrs, ''
 
     src_key: str = src_key_set.pop()
-    if not _is_local_resource(attrs[src_key], page_url):
-        return {}, ''
+    if not _is_local_resource(local_attrs[src_key], page_url):
+        return attrs, ''
 
     resource_url = urljoin(page_url, attrs[src_key])
-    file_name = name.get_for_res_file(page_url, resource_url)
-    return {src_key: os.path.join(local_res_dir, file_name)}, resource_url
+    file_name = url.to_res_filename(page_url, resource_url)
+    local_attrs[src_key] = os.path.join(local_res_dir, file_name)
+    return local_attrs, resource_url
 
 
 def _is_local_resource(value: str, page_url: str) -> bool:
