@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 CHUNK_SIZE = 256
 
 
-def get_page(url: str) -> bytes:
+def get_page(url: str) -> str:
     """Load the content."""
     try:
         response = requests.get(url)
