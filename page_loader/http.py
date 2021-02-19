@@ -41,11 +41,10 @@ def get_resource_chunks(url: str) -> Generator:
             for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                 yield chunk
         except requests.RequestException as exc:
-            logger.error(
-                '{e}: URL is {url}'.format(url=url, e=type(exc).__name__)
+            logger.warning(
+                '{e}: cant download resource. URL is {url}'.format(
+                    url=url, e=type(exc).__name__
+                )
             )
-            raise errors.NetError(
-                'cant connect to {url}'.format(url=url)
-            ) from exc
 
     return chunks()
