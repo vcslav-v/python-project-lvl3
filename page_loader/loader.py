@@ -23,17 +23,17 @@ def download(page_url: str, output_path: str = os.getcwd()) -> str:
     page_url = _add_scheme_if_missing(page_url)
 
     logger.info('Request to {url}'.format(url=url))
-    response = http.get_page(page_url)
+    page_html = http.get_page(page_url)
 
     local_res_dir = url.to_res_dir_name(page_url)
 
     logger.info('Get resources from page.')
-    local_page, resource_urls = localizer.make_local_html(
-        response, page_url, local_res_dir
+    local_page_html, resource_urls = localizer.make_local_html(
+        page_html, page_url, local_res_dir
     )
 
     logger.info('Write html page file.')
-    output_page_file_path = _save_page(local_page, page_url, output_path)
+    output_page_file_path = _save_page(local_page_html, page_url, output_path)
 
     logger.info('Start download resources.')
     _download_and_save_resources(
