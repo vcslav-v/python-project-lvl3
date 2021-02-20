@@ -48,7 +48,7 @@ def _localize_tag(
         return attrs, ''
 
     resource_url = urljoin(page_url, attrs[src_key])
-    file_name = url.to_res_filename(page_url, resource_url)
+    file_name = url.to_filename(resource_url)
     local_attrs[src_key] = os.path.join(local_res_dir, file_name)
     return local_attrs, resource_url
 
