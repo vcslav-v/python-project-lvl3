@@ -1,7 +1,7 @@
 import logging
 import os
 from typing import List
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 import pathlib
 
 from progress.bar import Bar
@@ -23,17 +23,17 @@ def download(page_url: str, output_path: str = os.getcwd()) -> str:
     page_url = _add_scheme_if_missing(page_url)
 
     logger.info('Request to {url}'.format(url=url))
-    response = http.get_page(page_url)
+    page_html = http.get_page(page_url)
 
     local_res_dir = url.to_res_dir_name(page_url)
 
     logger.info('Get resources from page.')
-    local_page, resource_urls = localizer.make_local_html(
-        response, page_url, local_res_dir
+    local_page_html, resource_urls = localizer.make_local_html(
+        page_html, page_url, local_res_dir
     )
 
     logger.info('Write html page file.')
-    output_page_file_path = _save_page(local_page, page_url, output_path)
+    output_page_file_path = _save_page(local_page_html, page_url, output_path)
 
     logger.info('Start download resources.')
     _download_and_save_resources(
@@ -66,7 +66,8 @@ def _download_and_save_resources(
     bar = Bar('Download resources', max=len(resource_urls))
     for res_url in resource_urls:
         data_chunks = http.get_resource_chunks(res_url)
-        file_name = url.to_res_filename(page_url, res_url)
+        res_url = urljoin(page_url, res_url)
+        file_name = url.to_filename(res_url)
         res_file_path = os.path.join(full_path_res_dir, file_name)
         try:
             with open(res_file_path, 'wb') as output_file:
@@ -88,7 +89,7 @@ def _save_page(page_html: str, page_url: str, output_path: str) -> str:
     """Save the html page."""
     output_page_file_path = os.path.join(
         output_path,
-        url.to_page_filename(page_url)
+        url.to_filename(page_url)
     )
     try:
         with open(output_page_file_path, 'w') as output_file:

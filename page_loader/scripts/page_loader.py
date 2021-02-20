@@ -77,7 +77,7 @@ def get_arguments() -> Tuple[str, str]:
         default=os.getcwd()
     )
     args = parser.parse_args()
-    return (str(args.url), str(args.output))
+    return (args.url, args.output)
 
 
 if __name__ == "__main__":

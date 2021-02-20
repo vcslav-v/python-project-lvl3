@@ -12,10 +12,10 @@ RES_ATTR = {'src', 'href'}
 
 
 def make_local_html(
-    response: str, page_url: str, local_res_dir: str
+    page_html: str, page_url: str, local_res_dir: str
 ) -> Tuple[str, List[str]]:
     """Localize the resources page."""
-    soup = BeautifulSoup(response, 'html.parser')
+    soup = BeautifulSoup(page_html, 'html.parser')
     tags = soup.find_all(RESOURCES_TAGS)
     resources = []
     bar = Bar('Parsing resources', max=len(tags))
@@ -48,7 +48,7 @@ def _localize_tag(
         return attrs, ''
 
     resource_url = urljoin(page_url, attrs[src_key])
-    file_name = url.to_res_filename(page_url, resource_url)
+    file_name = url.to_filename(resource_url)
     local_attrs[src_key] = os.path.join(local_res_dir, file_name)
     return local_attrs, resource_url
 

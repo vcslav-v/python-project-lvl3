@@ -113,17 +113,21 @@ def test_download_dir_not_exist():
 @pytest.mark.parametrize(
     (
         'url, html_data, expect_html_data, expect_res_path, '
-        'expect_page_file_name, urls_res, expect_files'
+        'expect_page_file_name, text_res_urls, img_res_urls, '
+        'img, text_expect_files, img_expect_files'
     ),
     [
         (
             'http://site.com/blog/about',
-            'res_test_2_html',
-            'res_test_2_expect_html',
+            'res_test_html',
+            'res_test_expect_html',
             'site-com-blog-about_files',
             'site-com-blog-about.html',
-            'res_urls_2',
-            'res_file_path_expect_2',
+            'text_res_urls_expect',
+            'img_res_urls_expect',
+            'img_file',
+            'text_res_file_path_expect',
+            'img_res_file_path_expect',
         ),
     ]
 )
@@ -133,28 +137,63 @@ def test_download_hexlet(
     expect_html_data,
     expect_res_path,
     expect_page_file_name,
-    urls_res,
-    expect_files,
+    text_res_urls,
+    img_res_urls,
+    img,
+    text_expect_files,
+    img_expect_files,
     request
 ):
+    #  Get fixtures
     html_data = request.getfixturevalue(html_data)
     expect_html_data = request.getfixturevalue(expect_html_data)
-    urls_res = request.getfixturevalue(urls_res)
-    expect_files = request.getfixturevalue(expect_files)
+    text_res_urls = request.getfixturevalue(text_res_urls)
+    img_res_urls = request.getfixturevalue(img_res_urls)
+    img = request.getfixturevalue(img)
+    text_expect_files = request.getfixturevalue(text_expect_files)
+    img_expect_files = request.getfixturevalue(img_expect_files)
     expect_soup = BeautifulSoup(expect_html_data, 'html.parser')
 
+    #  Preparing the environment
     with tempfile.TemporaryDirectory() as tmp_dir:
         with requests_mock.Mocker() as mocker:
             mocker.get(url, text=html_data)
-            for url_res in urls_res:
-                mocker.get(url_res.strip(), text='img')
+            for url_res in text_res_urls:
+                mocker.get(url_res.strip(), text=html_data)
+            for url_res in img_res_urls:
+                mocker.get(url_res.strip(), content=img)
+            #  Run app
             result_path = download(url, tmp_dir)
+        #  Page file path is expect
         expect_path = os.path.join(
             tmp_dir,
             expect_page_file_name
         )
         assert result_path == expect_path
 
+        #  Resource directory is exist
+        expect_res_folder = os.path.join(tmp_dir, expect_res_path)
+        assert os.path.isdir(expect_res_folder)
+
+        #  Resources downloaded correctly (text)
+        for text_expect_file in text_expect_files:
+            res_path = os.path.join(
+                expect_res_folder, text_expect_file.strip()
+            )
+            assert os.path.exists(res_path)
+
+            with open(res_path) as res_file:
+                assert html_data == res_file.read()
+
+        #  Resources downloaded correctly (bytes)
+        for img_expect_file in img_expect_files:
+            res_path = os.path.join(expect_res_folder, img_expect_file.strip())
+            assert os.path.exists(res_path)
+
+            with open(res_path, 'rb') as res_file:
+                assert img == res_file.read()
+
+        #  Html page downloaded correctly
         with open(result_path, 'r') as result_file:
             soup = BeautifulSoup(result_file.read(), 'html.parser')
         expect_html = expect_soup.prettify(formatter='html5')
