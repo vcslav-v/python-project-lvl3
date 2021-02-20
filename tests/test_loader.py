@@ -144,6 +144,7 @@ def test_download_hexlet(
     img_expect_files,
     request
 ):
+    #  Get fixtures
     html_data = request.getfixturevalue(html_data)
     expect_html_data = request.getfixturevalue(expect_html_data)
     text_res_urls = request.getfixturevalue(text_res_urls)
@@ -153,6 +154,7 @@ def test_download_hexlet(
     img_expect_files = request.getfixturevalue(img_expect_files)
     expect_soup = BeautifulSoup(expect_html_data, 'html.parser')
 
+    #  Preparing the environment
     with tempfile.TemporaryDirectory() as tmp_dir:
         with requests_mock.Mocker() as mocker:
             mocker.get(url, text=html_data)
@@ -160,16 +162,20 @@ def test_download_hexlet(
                 mocker.get(url_res.strip(), text=html_data)
             for url_res in img_res_urls:
                 mocker.get(url_res.strip(), content=img)
+            #  Run app
             result_path = download(url, tmp_dir)
+        #  Page file path is expect
         expect_path = os.path.join(
             tmp_dir,
             expect_page_file_name
         )
         assert result_path == expect_path
 
+        #  Resource directory is exist
         expect_res_folder = os.path.join(tmp_dir, expect_res_path)
         assert os.path.isdir(expect_res_folder)
 
+        #  Resources downloaded correctly (text)
         for text_expect_file in text_expect_files:
             res_path = os.path.join(
                 expect_res_folder, text_expect_file.strip()
@@ -179,6 +185,7 @@ def test_download_hexlet(
             with open(res_path) as res_file:
                 assert html_data == res_file.read()
 
+        #  Resources downloaded correctly (bytes)
         for img_expect_file in img_expect_files:
             res_path = os.path.join(expect_res_folder, img_expect_file.strip())
             assert os.path.exists(res_path)
@@ -186,6 +193,7 @@ def test_download_hexlet(
             with open(res_path, 'rb') as res_file:
                 assert img == res_file.read()
 
+        #  Html page downloaded correctly
         with open(result_path, 'r') as result_file:
             soup = BeautifulSoup(result_file.read(), 'html.parser')
         expect_html = expect_soup.prettify(formatter='html5')
