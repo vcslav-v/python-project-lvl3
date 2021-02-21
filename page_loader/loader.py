@@ -1,7 +1,7 @@
 import logging
 import os
 from typing import List
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse
 import pathlib
 
 from progress.bar import Bar
@@ -65,11 +65,10 @@ def _download_and_save_resources(
 
     bar = Bar('Download resources', max=len(resource_urls))
     for res_url in resource_urls:
-        data_chunks = http.get_resource_chunks(res_url)
-        res_url = urljoin(page_url, res_url)
         file_name = url.to_filename(res_url)
         res_file_path = os.path.join(full_path_res_dir, file_name)
         try:
+            data_chunks = http.get_resource_chunks(res_url)
             with open(res_file_path, 'wb') as output_file:
                 for data_chunk in data_chunks:
                     output_file.write(data_chunk)
@@ -81,6 +80,12 @@ def _download_and_save_resources(
             raise errors.SaveError(
                 'File {path} cant be save.'.format(path=output_path)
             ) from exc
+        except errors.NetError as exc:
+            logger.warning(
+                '{e}: cant download resource. URL is {url}'.format(
+                    url=url, e=type(exc).__name__
+                )
+            )
         bar.next()
     bar.finish()
 
